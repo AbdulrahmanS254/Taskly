@@ -7,7 +7,11 @@ export const router = createBrowserRouter([
         Component: App,
     },
     {
-        path: '/signup',
-        element: <div>coco wawa</div>,
+        path: '/project',
+        element: <div>main page</div>,
+    },
+    {
+        path: '/sign-up',
+        element: <div>signup</div>,
     },
 ]);
