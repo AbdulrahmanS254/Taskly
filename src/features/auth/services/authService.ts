@@ -1,0 +1,38 @@
+import type { SignUpData } from '../schemas/signUpSchema';
+
+const API_BASE_URL =
+    'https://dehomokujooddvosrpzj.supabase.co/auth/v1';
+const API_ANON_KEY =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlaG9tb2t1am9vZGR2b3NycHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1OTgxNzcsImV4cCI6MjA5OTE3NDE3N30.3OXdhRdh5nMyni05dhfQiVJvU1WXeLKLVAEiUq5X8z4';
+
+export const signUpUser = async (formData: SignUpData) => {
+    const apiBody = {
+        email: formData.email,
+        password: formData.password,
+        data: {
+            name: formData.name,
+            job_title: formData.jobTitle || '',
+        },
+    };
+
+    const response = await fetch(`${API_BASE_URL}/signup`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            apikey: API_ANON_KEY,
+            Authorization: `Bearer ${API_ANON_KEY}`,
+        },
+        body: JSON.stringify(apiBody),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+            errorData.error_description ||
+                errorData.message ||
+                'Registration failed. Please try again.'
+        );
+    }
+
+    return response.json();
+};
