@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 
 import { LoginSchema } from '../schemas/loginSchema';
 import type { LoginData } from '../schemas/loginSchema';
@@ -101,9 +101,9 @@ export default function LoginForm() {
 
             <div className="flex justify-center gap-1 pt-8 text-sm">
                 <span className="text-slate-500">Don’t have an account?</span>
-                <span onClick={() => navigate('/sign-up')} className="text-primary font-semibold cursor-pointer hover:underline">
+                <NavLink to={"/sign-up"} className="text-primary font-semibold cursor-pointer hover:underline">
                     Sign up
-                </span>
+                </NavLink>
             </div>
         </div>
     );
