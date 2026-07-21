@@ -22,6 +22,17 @@ interface RequestOptions {
     defaultErrorMessage: string;
 }
 
+// Response in login & signup
+export interface AuthResponse {
+    access_token: string;
+    refresh_token?: string;
+    expires_in?: number;
+    user?: {
+        id: string;
+        email: string;
+    };
+}
+
 async function apiRequest<T>({
     endpoint,
     method = 'POST',
@@ -91,7 +102,7 @@ export const signUpUser = async (formData: SignUpData) => {
 };
 
 export const loginUser = async ( formData: LoginData ) => {
-    return apiRequest({
+    return apiRequest<AuthResponse>({
         endpoint: '/token?grant_type=password',
         body: {
             email: formData.email,
@@ -107,5 +118,14 @@ export const getCurrentUser = async (): Promise<CurrentUser> => {
         method: 'GET',
         useUserToken: true, // هنا بنقوله استخدم التوكن المجهزة في الـ Storage
         defaultErrorMessage: 'Failed to fetch user data.',
+    });
+};
+
+export const logoutUser = async (): Promise<void> => {
+    return apiRequest<void>({
+        endpoint: '/logout',
+        method: 'POST',
+        useUserToken: true,
+        defaultErrorMessage: 'Logout failed, please try again.',
     });
 };
