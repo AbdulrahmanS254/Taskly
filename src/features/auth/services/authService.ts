@@ -1,8 +1,10 @@
 import type { SignUpData } from '../schemas/signUpSchema';
 import type { LoginData } from '../schemas/loginSchema';
 
-const API_BASE_URL = 'https://dehomokujooddvosrpzj.supabase.co/auth/v1';
-const API_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlaG9tb2t1am9vZGR2b3NycHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1OTgxNzcsImV4cCI6MjA5OTE3NDE3N30.3OXdhRdh5nMyni05dhfQiVJvU1WXeLKLVAEiUq5X8z4';
+const API_BASE_URL =
+    'https://dehomokujooddvosrpzj.supabase.co/auth/v1';
+const API_ANON_KEY =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlaG9tb2t1am9vZGR2b3NycHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1OTgxNzcsImV4cCI6MjA5OTE3NDE3N30.3OXdhRdh5nMyni05dhfQiVJvU1WXeLKLVAEiUq5X8z4';
 
 export interface CurrentUser {
     user_metadata?: {
@@ -11,82 +13,99 @@ export interface CurrentUser {
     };
 }
 
-export const signUpUser = async (formData: SignUpData) => {
-    const apiBody = {
-        email: formData.email,
-        password: formData.password,
-        data: {
-            name: formData.name,
-            job_title: formData.jobTitle || '',
-        },
-    };
+// Wrapper Function for api requests
+interface RequestOptions {
+    endpoint: string;
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    body?: any;
+    useUserToken?: boolean;
+    defaultErrorMessage: string;
+}
 
-    const response = await fetch(`${API_BASE_URL}/signup`, {
-        method: 'POST',
+async function apiRequest<T>({
+    endpoint,
+    method = 'POST',
+    body,
+    useUserToken = false,
+    defaultErrorMessage = 'Request failed. Please try again.',
+}: RequestOptions): Promise<T> {
+    let authToken = API_ANON_KEY; // Why?
+
+    // checking if there is a token
+    if (useUserToken) {
+        const userToken =
+            localStorage.getItem('token') ||
+            sessionStorage.getItem('token');
+        if (!userToken) throw new Error('No active token found');
+        authToken = userToken;
+    }
+
+    const config: RequestInit = {
+        method,
         headers: {
             'Content-Type': 'application/json',
             apikey: API_ANON_KEY,
-            Authorization: `Bearer ${API_ANON_KEY}`,
+            Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify(apiBody),
-    });
+    };
+
+    if (body) {
+        config.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(
+        `${API_BASE_URL}${endpoint}`,
+        config
+    );
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
             errorData.error_description ||
                 errorData.message ||
-                'Registration failed. Please try again.'
+                defaultErrorMessage
         );
     }
 
-    return response.json();
-};
+    if (response.status === 204) {
+        return {} as T;
+    }
 
-export const loginUser = async (formData: LoginData) => {
-    const response = await fetch(`${API_BASE_URL}/token?grant_type=password`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            apikey: API_ANON_KEY,
-            Authorization: `Bearer ${API_ANON_KEY}`,
-        },
-        body: JSON.stringify({
+    return response.json();
+}
+
+// Actual requests
+export const signUpUser = async (formData: SignUpData) => {
+    return apiRequest({
+        endpoint: '/signup',
+        body: {
             email: formData.email,
             password: formData.password,
-        }),
+            data: {
+                name: formData.name,
+                job_title: formData.jobTitle || '',
+            },
+        },
+        defaultErrorMessage: 'Registration failed. Please try again.',
     });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-            errorData.error_description || 
-                errorData.message || 
-                'Invalid email or password.'
-        );
-    }
-
-    return response.json();
 };
 
-export const getCurrentUser = async (): Promise<CurrentUser> => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    
-    if (!token) throw new Error('No session found');
-
-    const response = await fetch(`${API_BASE_URL}/user`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            apikey: API_ANON_KEY,
-            Authorization: `Bearer ${token}`,
+export const loginUser = async ( formData: LoginData ) => {
+    return apiRequest({
+        endpoint: '/token?grant_type=password',
+        body: {
+            email: formData.email,
+            password: formData.password,
         },
+        defaultErrorMessage: 'Invalid email or password.'
+    })
+}
+
+export const getCurrentUser = async (): Promise<CurrentUser> => {
+    return apiRequest<CurrentUser>({
+        endpoint: '/user',
+        method: 'GET',
+        useUserToken: true, // هنا بنقوله استخدم التوكن المجهزة في الـ Storage
+        defaultErrorMessage: 'Failed to fetch user data.',
     });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to fetch user data.');
-    }
-
-    return response.json();
 };
