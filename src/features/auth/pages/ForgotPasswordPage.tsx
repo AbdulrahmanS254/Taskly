@@ -2,19 +2,33 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router';
+import { Input } from '../../../components/ui/Input';
 import {
     forgotPasswordSchema,
     type ForgotPasswordData,
 } from '../schemas/forgotPasswordSchema';
 import { recoverPassword } from '../services/authService';
 
-const COOLDOWN_TIME = 300;
+const COOLDOWN_SECONDS = 300; // 5 Minutes
 const MAX_TRIALS = 3;
 
+const STORAGE_KEYS = {
+    COOLDOWN_END: 'forgot_password_cooldown_end',
+    TRIALS_COUNT: 'forgot_password_trials_count',
+    SUBMITTED_EMAIL: 'forgot_password_email',
+};
+
 export default function ForgotPasswordPage() {
-    const [isSubmitted, setIsSubmitted] = useState(false);
-    const [trialsCount, setTrialsCount] = useState(0);
-    const [timer, setTimer] = useState(0);
+    const [isSubmitted, setIsSubmitted] = useState<boolean>(() => {
+        return !!localStorage.getItem(STORAGE_KEYS.SUBMITTED_EMAIL);
+    });
+
+    const [trialsCount, setTrialsCount] = useState<number>(() => {
+        const saved = localStorage.getItem(STORAGE_KEYS.TRIALS_COUNT);
+        return saved ? parseInt(saved, 10) : 0;
+    });
+
+    const [timer, setTimer] = useState<number>(0);
     const [serverError, setServerError] = useState<string | null>(
         null
     );
@@ -23,16 +37,57 @@ export default function ForgotPasswordPage() {
         register,
         handleSubmit,
         getValues,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<ForgotPasswordData>({
         resolver: zodResolver(forgotPasswordSchema),
+        defaultValues: {
+            email:
+                localStorage.getItem(STORAGE_KEYS.SUBMITTED_EMAIL) ||
+                '',
+        },
     });
+
+    useEffect(() => {
+        const checkCooldown = () => {
+            const savedEndTime = localStorage.getItem(
+                STORAGE_KEYS.COOLDOWN_END
+            );
+            if (savedEndTime) {
+                const endTime = parseInt(savedEndTime, 10);
+                const now = Date.now();
+                const remainingSeconds = Math.max(
+                    0,
+                    Math.floor((endTime - now) / 1000)
+                );
+
+                if (remainingSeconds > 0) {
+                    setTimer(remainingSeconds);
+                } else {
+                    localStorage.removeItem(
+                        STORAGE_KEYS.COOLDOWN_END
+                    );
+                    setTimer(0);
+                }
+            }
+        };
+
+        checkCooldown();
+    }, []);
 
     useEffect(() => {
         let interval: ReturnType<typeof setInterval>;
         if (timer > 0) {
             interval = setInterval(() => {
-                setTimer((prev) => prev - 1);
+                setTimer((prev) => {
+                    if (prev <= 1) {
+                        localStorage.removeItem(
+                            STORAGE_KEYS.COOLDOWN_END
+                        );
+                        return 0;
+                    }
+                    return prev - 1;
+                });
             }, 1000);
         }
         return () => clearInterval(interval);
@@ -42,9 +97,25 @@ export default function ForgotPasswordPage() {
         setServerError(null);
         try {
             await recoverPassword(email);
+
+            const cooldownEndTime =
+                Date.now() + COOLDOWN_SECONDS * 1000;
+            const newTrialsCount = trialsCount + 1;
+
+            localStorage.setItem(
+                STORAGE_KEYS.COOLDOWN_END,
+                cooldownEndTime.toString()
+            );
+            localStorage.setItem(
+                STORAGE_KEYS.TRIALS_COUNT,
+                newTrialsCount.toString()
+            );
+            localStorage.setItem(STORAGE_KEYS.SUBMITTED_EMAIL, email);
+
             setIsSubmitted(true);
-            setTrialsCount((prev) => prev + 1);
-            setTimer(COOLDOWN_TIME);
+            setTrialsCount(newTrialsCount);
+            setTimer(COOLDOWN_SECONDS);
+            setValue('email', email);
         } catch (error: any) {
             setServerError(
                 error.message ||
@@ -73,82 +144,44 @@ export default function ForgotPasswordPage() {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto p-8 sm:p-10 bg-white border border-slate-300/30 rounded-lg shadow-[0px_24px_48px_-12px_rgba(4,27,60,0.06)]">
-            <div className="flex flex-col items-center sm:items-start text-center sm:text-left gap-2 mb-8">
-                <div className="sm:hidden bg-surface-highest flex items-center justify-center rounded-xl size-12 mb-3">
-                    <svg
-                        className="size-5 text-primary"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                    >
-                        <rect
-                            x="4"
-                            y="9"
-                            width="12"
-                            height="8"
-                            rx="1.5"
-                        />
-                        <path d="M6.5 9V6.5a3.5 3.5 0 017 0V9" />
-                    </svg>
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
-                    Reset Password
-                </h2>
-                <p className="text-sm text-slate-500">
-                    Enter your email address and we will send you a
-                    link to reset your password.
-                </p>
-            </div>
+        <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                Reset Password
+            </h2>
+            <p className="text-sm text-slate-600 mb-6">
+                Enter your email address and we will send you a link
+                to reset your password.
+            </p>
 
             {serverError && (
-                <div className="p-3 mb-4 bg-error/10 border border-error/20 text-error text-sm rounded-md font-medium">
+                <div className="p-3 mb-4 bg-red-50 text-red-600 text-sm rounded-md">
                     {serverError}
                 </div>
             )}
 
             {isSubmitted && (
-                <div className="p-4 mb-6 bg-success/15 rounded-lg flex gap-3 items-start">
-                    <svg
-                        className="size-5 text-[#005235] shrink-0 mt-0.5"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                    >
-                        <circle cx="10" cy="10" r="7.5" />
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M7 10l2 2 4-4.5"
-                        />
-                    </svg>
-                    <p className="text-[#005235] text-sm">
-                        If an account exists with this email, we’ve
-                        sent a password reset link.
-                    </p>
+                <div className="p-4 mb-6 bg-green-50 border border-green-200 text-green-700 text-sm rounded-md">
+                    If an account exists with this email, we’ve sent a
+                    password reset link.
                 </div>
             )}
 
             <form
                 onSubmit={handleSubmit(onSubmit)}
                 noValidate
-                className="space-y-5"
+                className="space-y-4"
             >
                 <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-muted mb-2">
-                        Email Address
-                    </label>
-                    <input
+                    <Input
+                        label="Email Address"
                         type="email"
                         {...register('email')}
                         disabled={isSubmitted}
-                        className="w-full bg-surface-highest border border-slate-300/30 px-4 py-3 rounded text-slate-900 placeholder:text-slate-muted focus:ring-2 focus:ring-primary focus:outline-none disabled:opacity-60"
+                        className="w-full border border-slate-300 p-2.5 rounded-md focus:ring-2 focus:ring-primary focus:outline-none disabled:bg-slate-100"
                         placeholder="name@example.com"
                     />
                     {errors.email && (
-                        <p className="text-error text-xs mt-1.5 font-medium">
+                        <p className="text-red-500 text-xs mt-1">
                             {errors.email.message}
                         </p>
                     )}
@@ -158,14 +191,14 @@ export default function ForgotPasswordPage() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full bg-linear-to-br from-primary to-primary-container text-white py-3 rounded font-semibold shadow-md hover:shadow-lg transition disabled:opacity-50 cursor-pointer"
+                        className="w-full bg-primary text-white py-2.5 rounded-md font-semibold hover:bg-primary/90 transition disabled:opacity-50 cursor-pointer"
                     >
                         {isSubmitting
                             ? 'Sending Link...'
                             : 'Send Reset Link'}
                     </button>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                         <button
                             type="button"
                             onClick={handleResend}
@@ -174,24 +207,8 @@ export default function ForgotPasswordPage() {
                                 trialsCount >= MAX_TRIALS ||
                                 isSubmitting
                             }
-                            className="w-full bg-surface-low text-slate-muted py-3 rounded font-semibold flex items-center justify-center gap-2 hover:bg-surface-highest transition disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                            className="w-full bg-slate-800 text-white py-2.5 rounded-md font-semibold hover:bg-slate-700 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
-                            <svg
-                                className="size-4.5 shrink-0"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                            >
-                                <rect
-                                    x="2.5"
-                                    y="4.5"
-                                    width="15"
-                                    height="11"
-                                    rx="1.5"
-                                />
-                                <path d="M2.5 5.5l7.5 6 7.5-6" />
-                            </svg>
                             {isSubmitting
                                 ? 'Sending...'
                                 : timer > 0
@@ -207,24 +224,11 @@ export default function ForgotPasswordPage() {
                     </div>
                 )}
 
-                <div className="text-center pt-2">
+                <div className="text-center mt-4">
                     <Link
                         to="/login"
-                        className="inline-flex items-center gap-1.5 text-xs text-primary font-semibold hover:underline"
+                        className="text-xs text-primary font-semibold hover:underline"
                     >
-                        <svg
-                            className="size-3"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M12 15l-5-5 5-5"
-                            />
-                        </svg>
                         Back to Login
                     </Link>
                 </div>
