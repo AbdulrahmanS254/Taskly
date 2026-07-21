@@ -87,7 +87,7 @@ async function apiRequest<T>({
 
 // Actual requests
 export const signUpUser = async (formData: SignUpData) => {
-    return apiRequest({
+    return apiRequest<AuthResponse>({
         endpoint: '/signup',
         body: {
             email: formData.email,

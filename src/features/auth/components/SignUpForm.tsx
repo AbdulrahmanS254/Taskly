@@ -31,8 +31,8 @@ export default function SignUpForm() {
         setServerError(null);
         try {
             const result = await signUpUser(data);
-            if (result.token) {
-                localStorage.setItem('token', result.token);
+            if (result.access_token) {
+                localStorage.setItem('token', result.access_token);
             }
             navigate('/project');
         } catch (error: any) {
