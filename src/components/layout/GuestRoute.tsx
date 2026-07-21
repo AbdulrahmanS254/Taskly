@@ -5,7 +5,6 @@ export default function GuestRoute() {
         localStorage.getItem('token') ||
         sessionStorage.getItem('token');
 
-    // token ? <Navigate to={'/projects'} replace /> : <Outlet />;
     if (token) {
         return <Navigate to={'/projects'} replace />;
     }

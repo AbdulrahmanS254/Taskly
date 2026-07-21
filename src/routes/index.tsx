@@ -5,6 +5,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import GuestRoute from '../components/layout/GuestRoute';
 import ProtectedRoute from './ProtectedRoute';
 import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage';
+import ResetPasswordPage from '../features/auth/pages/ResetPasswordPage';
 
 export const router = createBrowserRouter([
     {
@@ -25,6 +26,10 @@ export const router = createBrowserRouter([
             {
                 path: '/forgot-password',
                 element: <ForgotPasswordPage />,
+            },
+            {
+                path: '/reset-password',
+                element: <ResetPasswordPage />,
             },
         ],
     },
