@@ -6,11 +6,12 @@ import GuestRoute from '../components/layout/GuestRoute';
 import ProtectedRoute from './ProtectedRoute';
 import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage';
 import ResetPasswordPage from '../features/auth/pages/ResetPasswordPage';
+import RootRedirect from './RootRedirect.tsx'; 
 
 export const router = createBrowserRouter([
     {
         path: '/',
-        element: <Navigate to="/login" replace />,
+        element: <RootRedirect />,
     },
     {
         element: <GuestRoute />,
@@ -27,11 +28,12 @@ export const router = createBrowserRouter([
                 path: '/forgot-password',
                 element: <ForgotPasswordPage />,
             },
-            {
-                path: '/reset-password',
-                element: <ResetPasswordPage />,
-            },
         ],
+    },
+    // public path
+    {
+        path: '/reset-password',
+        element: <ResetPasswordPage />,
     },
     {
         element: <ProtectedRoute />,
