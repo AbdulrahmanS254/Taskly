@@ -72,9 +72,9 @@ export default function LoginForm() {
                         {...register('password')}
                     />
                     <div className="flex justify-end mt-2">
-                        <button type="button" className="text-xs text-primary font-semibold cursor-pointer hover:underline">
+                        <NavLink to={'/forgot-password'} className="text-xs text-primary font-semibold cursor-pointer hover:underline">
                             Forgot password?
-                        </button>
+                        </NavLink>
                     </div>
                 </div>
 

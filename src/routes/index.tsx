@@ -4,6 +4,7 @@ import SignUpPage from '../features/auth/pages/SignUpPage';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import GuestRoute from '../components/layout/GuestRoute';
 import ProtectedRoute from './ProtectedRoute';
+import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage';
 
 export const router = createBrowserRouter([
     {
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
             {
                 path: '/sign-up',
                 element: <SignUpPage />,
+            },
+            {
+                path: '/forgot-password',
+                element: <ForgotPasswordPage />,
             },
         ],
     },

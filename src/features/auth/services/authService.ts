@@ -13,16 +13,15 @@ export interface CurrentUser {
     };
 }
 
-// Wrapper Function for api requests
 interface RequestOptions {
     endpoint: string;
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
     body?: any;
     useUserToken?: boolean;
-    defaultErrorMessage: string;
+    customToken?: string; 
+    defaultErrorMessage?: string;
 }
 
-// Response in login & signup
 export interface AuthResponse {
     access_token: string;
     refresh_token?: string;
@@ -38,12 +37,15 @@ async function apiRequest<T>({
     method = 'POST',
     body,
     useUserToken = false,
+    customToken,
     defaultErrorMessage = 'Request failed. Please try again.',
 }: RequestOptions): Promise<T> {
-    let authToken = API_ANON_KEY; // Why?
+    let authToken = API_ANON_KEY;
 
-    // checking if there is a token
-    if (useUserToken) {
+    // استخدام التوكن القادمة من رابط الإيميل أولاً إن وجدت، وإلا البحث في Storage
+    if (customToken) {
+        authToken = customToken;
+    } else if (useUserToken) {
         const userToken =
             localStorage.getItem('token') ||
             sessionStorage.getItem('token');
@@ -85,7 +87,6 @@ async function apiRequest<T>({
     return response.json();
 }
 
-// Actual requests
 export const signUpUser = async (formData: SignUpData) => {
     return apiRequest<AuthResponse>({
         endpoint: '/signup',
@@ -101,22 +102,22 @@ export const signUpUser = async (formData: SignUpData) => {
     });
 };
 
-export const loginUser = async ( formData: LoginData ) => {
+export const loginUser = async (formData: LoginData) => {
     return apiRequest<AuthResponse>({
         endpoint: '/token?grant_type=password',
         body: {
             email: formData.email,
             password: formData.password,
         },
-        defaultErrorMessage: 'Invalid email or password.'
-    })
-}
+        defaultErrorMessage: 'Invalid email or password.',
+    });
+};
 
 export const getCurrentUser = async (): Promise<CurrentUser> => {
     return apiRequest<CurrentUser>({
         endpoint: '/user',
         method: 'GET',
-        useUserToken: true, // هنا بنقوله استخدم التوكن المجهزة في الـ Storage
+        useUserToken: true,
         defaultErrorMessage: 'Failed to fetch user data.',
     });
 };
@@ -127,5 +128,27 @@ export const logoutUser = async (): Promise<void> => {
         method: 'POST',
         useUserToken: true,
         defaultErrorMessage: 'Logout failed, please try again.',
+    });
+};
+
+export const recoverPassword = async (email: string): Promise<void> => {
+    return apiRequest<void>({
+        endpoint: '/recover',
+        method: 'POST',
+        body: { email },
+        defaultErrorMessage: 'Failed to send password reset link.',
+    });
+};
+
+export const updatePassword = async (
+    newPassword: string,
+    accessToken: string
+): Promise<void> => {
+    return apiRequest<void>({
+        endpoint: '/user',
+        method: 'PUT',
+        body: { password: newPassword },
+        customToken: accessToken,
+        defaultErrorMessage: 'Failed to update password.',
     });
 };
