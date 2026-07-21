@@ -1,7 +1,8 @@
 import { z } from 'zod';
+import { emailSchema } from './commonSchemas.ts';
 
 export const LoginSchema = z.object({
-    email: z.string().min(1, 'Email is required').email('Invalid email format'),
+    email: emailSchema,
     password: z.string().min(1, 'Password cannot be empty'),
     rememberMe: z.boolean().optional(),
 });
