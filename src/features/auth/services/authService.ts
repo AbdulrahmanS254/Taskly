@@ -19,11 +19,11 @@ export interface AuthResponse {
     };
 }
 
-const authUrl = 'https://dehomokujooddvosrpzj.supabase.co/auth/v1';
+const authURL = 'https://dehomokujooddvosrpzj.supabase.co/auth/v1';
 
 export const signUpUser = async (formData: SignUpData) => {
     return apiRequest<AuthResponse>({
-        baseUrl: authUrl,
+        baseUrl: authURL,
         endpoint: '/signup',
         body: {
             email: formData.email,
@@ -39,7 +39,7 @@ export const signUpUser = async (formData: SignUpData) => {
 
 export const loginUser = async (formData: LoginData) => {
     return apiRequest<AuthResponse>({
-        baseUrl: authUrl,
+        baseUrl: authURL,
         endpoint: '/token?grant_type=password',
         body: {
             email: formData.email,
@@ -51,7 +51,7 @@ export const loginUser = async (formData: LoginData) => {
 
 export const getCurrentUser = async (): Promise<CurrentUser> => {
     return apiRequest<CurrentUser>({
-        baseUrl: authUrl,
+        baseUrl: authURL,
         endpoint: '/user',
         method: 'GET',
         useUserToken: true,
@@ -61,7 +61,7 @@ export const getCurrentUser = async (): Promise<CurrentUser> => {
 
 export const logoutUser = async (): Promise<void> => {
     return apiRequest<void>({
-        baseUrl: authUrl,
+        baseUrl: authURL,
         endpoint: '/logout',
         method: 'POST',
         useUserToken: true,
@@ -71,7 +71,7 @@ export const logoutUser = async (): Promise<void> => {
 
 export const recoverPassword = async (email: string): Promise<void> => {
     return apiRequest<void>({
-        baseUrl: authUrl,
+        baseUrl: authURL,
         endpoint: '/recover',
         method: 'POST',
         body: { email },
@@ -84,7 +84,7 @@ export const updatePassword = async (
     accessToken: string
 ): Promise<void> => {
     return apiRequest<void>({
-        baseUrl: authUrl,
+        baseUrl: authURL,
         endpoint: '/user',
         method: 'PUT',
         body: { password: newPassword },
