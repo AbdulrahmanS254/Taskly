@@ -3,10 +3,10 @@ import LoginPage from '../features/auth/pages/LoginPage';
 import SignUpPage from '../features/auth/pages/SignUpPage';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import GuestRoute from '../components/layout/GuestRoute';
-import ProtectedRoute from './ProtectedRoute';
+import ProtectedRoute from './guards/ProtectedRoute.tsx';
 import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage';
 import ResetPasswordPage from '../features/auth/pages/ResetPasswordPage';
-import RootRedirect from './RootRedirect.tsx'; 
+import RootRedirect from './guards/RootRedirect.tsx';
 import AddProjectPage from '../features/projects/pages/AddProjectPage.tsx';
 
 export const router = createBrowserRouter([

@@ -1,14 +1,18 @@
 // src/routes/ProtectedRoute.tsx (or src/components/guards/ProtectedRoute.tsx)
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router';
-import { getCurrentUser } from '../features/auth/services/authService';
-import { clearAllAuthData } from '../utils/authHelpers';
+import { getCurrentUser } from '../../features/auth/services/authService';
+import { clearAllAuthData } from '../../utils/authHelpers';
 
 export default function ProtectedRoute() {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [isAuthenticated, setIsAuthenticated] = useState<
+        boolean | null
+    >(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const token =
+            localStorage.getItem('token') ||
+            sessionStorage.getItem('token');
 
         if (!token) {
             setIsAuthenticated(false);
