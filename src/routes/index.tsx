@@ -7,6 +7,7 @@ import ProtectedRoute from './ProtectedRoute';
 import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage';
 import ResetPasswordPage from '../features/auth/pages/ResetPasswordPage';
 import RootRedirect from './RootRedirect.tsx'; 
+import AddProjectPage from '../features/projects/pages/AddProjectPage.tsx';
 
 export const router = createBrowserRouter([
     {
@@ -46,8 +47,8 @@ export const router = createBrowserRouter([
                         element: <Navigate to="/projects" replace />,
                     },
                     {
-                        path: '/projects',
-                        element: <div>Projects Page Content</div>,
+                        path: '/project/add',
+                        element: <AddProjectPage />,
                     },
                     {
                         path: '/epics',
