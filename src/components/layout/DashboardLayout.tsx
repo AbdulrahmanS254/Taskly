@@ -1,17 +1,11 @@
 import { useState } from 'react';
-import { Navigate, Outlet } from 'react-router';
+import { Outlet } from 'react-router';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 
 export default function DashboardLayout() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
-
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-
-    if (!token) {
-        return <Navigate to="/login" replace />;
-    }
 
     return (
         <div className="bg-background min-h-screen">

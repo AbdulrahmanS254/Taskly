@@ -1,4 +1,3 @@
-// src/routes/ProtectedRoute.tsx (or src/components/guards/ProtectedRoute.tsx)
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router';
 import { getCurrentUser } from '../../features/auth/services/authService';
