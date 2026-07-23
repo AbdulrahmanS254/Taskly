@@ -53,32 +53,47 @@ export const router = createBrowserRouter([
                 element: <DashboardLayout />,
                 children: [
                     {
-                        path: '/projects',
-                        element: <ProjectsPage />,
-                    },
-                    {
-                        path: '/project/:id',
-                        element: <Navigate to="/projects" replace />,
-                    },
-                    {
-                        path: '/project/add',
-                        element: <AddProjectPage />,
-                    },
-                    {
-                        path: '/epics',
-                        element: <div>Project Epics Content</div>,
-                    },
-                    {
-                        path: '/tasks',
-                        element: <div>Project Tasks Content</div>,
-                    },
-                    {
-                        path: '/members',
-                        element: <div>Project Members Content</div>,
-                    },
-                    {
-                        path: '/details',
-                        element: <div>Project Details Content</div>,
+                        path: 'projects',
+                        children: [
+                            {
+                                index: true,
+                                element: <ProjectsPage />,
+                            },
+                            {
+                                path: 'add',
+                                element: <AddProjectPage />,
+                            },
+                            {
+                                path: ':projectId',
+                                children: [
+                                    {
+                                        index: true,
+                                        element: (
+                                            <Navigate
+                                                to="epics"
+                                                replace
+                                            />
+                                        ),
+                                    },
+                                    {
+                                        path: 'epics',
+                                        element: <div />,
+                                    },
+                                    {
+                                        path: 'tasks',
+                                        element: <div />,
+                                    },
+                                    {
+                                        path: 'members',
+                                        element: <div />,
+                                    },
+                                    {
+                                        path: 'edit',
+                                        element: <div />,
+                                    },
+                                ],
+                            },
+                        ],
                     },
                 ],
             },

@@ -129,7 +129,7 @@ function IconChevron({ collapsed }: { collapsed: boolean }) {
 }
 
 const mainNavItems = [
-    { label: 'Projects', to: '/project', icon: IconProjects },
+    { label: 'Projects', to: '/projects', icon: IconProjects },
 ];
 
 export default function Sidebar({
@@ -146,22 +146,22 @@ export default function Sidebar({
         ? [
               {
                   label: 'Project Epics',
-                  to: `/project/${projectId}/epics`,
+                  to: `/projects/${projectId}/epics`,
                   icon: IconEpics,
               },
               {
                   label: 'Project Tasks',
-                  to: `/project/${projectId}/tasks`,
+                  to: `/projects/${projectId}/tasks`,
                   icon: IconTasks,
               },
               {
                   label: 'Project Members',
-                  to: `/project/${projectId}/members`,
+                  to: `/projects/${projectId}/members`,
                   icon: IconMembers,
               },
               {
                   label: 'Project Details',
-                  to: `/project/${projectId}/edit`,
+                  to: `/projects/${projectId}/edit`,
                   icon: IconDetails,
               },
           ]
@@ -215,7 +215,7 @@ export default function Sidebar({
                                 key={to}
                                 to={to}
                                 onClick={onClose}
-                                end={to === '/project'}
+                                end={to === '/projects'}
                                 className={({ isActive }) =>
                                     `flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition ${
                                         isActive

@@ -97,7 +97,7 @@ export default function ProjectsPage() {
                     <p className="text-slate-500 text-base">Manage and curate your projects</p>
                 </div>
                 <button
-                    onClick={() => navigate('/project/add')}
+                    onClick={() => navigate('/projects/add')}
                     disabled={loading}
                     className="flex items-center gap-2 bg-linear-to-br from-primary to-primary-container text-white font-medium text-base px-6 py-3 rounded-sm shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05)] hover:opacity-90 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
                 >
