@@ -182,7 +182,7 @@ export default function ProjectsPage() {
         </div>
     );
 }
-
+    // needs to be moved to a separate component
 function ProjectSkeleton() {
     return (
         <div className="bg-white rounded-lg p-6 h-55 flex flex-col justify-between shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] animate-pulse">

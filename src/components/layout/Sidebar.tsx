@@ -1,4 +1,8 @@
-import { NavLink, useNavigate } from 'react-router';
+import {
+    NavLink,
+    useNavigate,
+    useParams,
+} from 'react-router';
 
 interface SidebarProps {
     open: boolean;
@@ -124,12 +128,8 @@ function IconChevron({ collapsed }: { collapsed: boolean }) {
     );
 }
 
-const navItems = [
+const mainNavItems = [
     { label: 'Projects', to: '/projects', icon: IconProjects },
-    { label: 'Project Epics', to: '/epics', icon: IconEpics },
-    { label: 'Project Tasks', to: '/tasks', icon: IconTasks },
-    { label: 'Project Members', to: '/members', icon: IconMembers },
-    { label: 'Project Details', to: '/details', icon: IconDetails },
 ];
 
 export default function Sidebar({
@@ -139,6 +139,35 @@ export default function Sidebar({
     onToggleCollapse,
 }: SidebarProps) {
     const navigate = useNavigate();
+
+    const { projectId } = useParams<{ projectId: string }>();
+
+    const projectNavItems = projectId
+        ? [
+              {
+                  label: 'Project Epics',
+                  to: `/projects/${projectId}/epics`,
+                  icon: IconEpics,
+              },
+              {
+                  label: 'Project Tasks',
+                  to: `/projects/${projectId}/tasks`,
+                  icon: IconTasks,
+              },
+              {
+                  label: 'Project Members',
+                  to: `/projects/${projectId}/members`,
+                  icon: IconMembers,
+              },
+              {
+                  label: 'Project Details',
+                  to: `/projects/${projectId}/edit`,
+                  icon: IconDetails,
+              },
+          ]
+        : [];
+
+    const navItems = [...mainNavItems, ...projectNavItems];
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -186,11 +215,12 @@ export default function Sidebar({
                                 key={to}
                                 to={to}
                                 onClick={onClose}
+                                end={to === '/projects'}
                                 className={({ isActive }) =>
                                     `flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition ${
                                         isActive
-                                            ? 'bg-white text-primary shadow-sm'
-                                            : 'text-slate-900'
+                                            ? 'bg-white text-primary shadow-sm font-semibold'
+                                            : 'text-slate-900 hover:bg-slate-100'
                                     } ${!showLabels ? 'justify-center' : ''}`
                                 }
                             >
