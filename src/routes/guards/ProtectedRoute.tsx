@@ -3,32 +3,40 @@ import { Navigate, Outlet } from 'react-router';
 import { getCurrentUser } from '../../features/auth/services/authService';
 import { clearAllAuthData } from '../../utils/authHelpers';
 
+/**
+ * ProtectedRoute: Handles async authentication verification
+ * - Prevents render-phase state updates by using a single state machine
+ * - Uses conditional rendering instead of throwing redirects during render
+ * - Navigation happens in effects, not during render
+ */
 export default function ProtectedRoute() {
-    const [isAuthenticated, setIsAuthenticated] = useState<
-        boolean | null
-    >(null);
+    const [authState, setAuthState] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
 
     useEffect(() => {
-        const token =
-            localStorage.getItem('token') ||
-            sessionStorage.getItem('token');
+        const verifyAuth = async () => {
+            const token =
+                localStorage.getItem('token') ||
+                sessionStorage.getItem('token');
 
-        if (!token) {
-            setIsAuthenticated(false);
-            return;
-        }
+            if (!token) {
+                setAuthState('unauthenticated');
+                return;
+            }
 
-        getCurrentUser()
-            .then(() => {
-                setIsAuthenticated(true);
-            })
-            .catch(() => {
+            try {
+                await getCurrentUser();
+                setAuthState('authenticated');
+            } catch {
                 clearAllAuthData();
-                setIsAuthenticated(false);
-            });
+                setAuthState('unauthenticated');
+            }
+        };
+
+        verifyAuth();
     }, []);
 
-    if (isAuthenticated === null) {
+    // Show loading state while verifying
+    if (authState === 'loading') {
         return (
             <div className="h-screen w-full flex items-center justify-center bg-background">
                 <div className="text-sm font-medium text-slate-600 animate-pulse">
@@ -38,9 +46,11 @@ export default function ProtectedRoute() {
         );
     }
 
-    if (!isAuthenticated) {
+    // Redirect unauthenticated users to login (happens after render phase)
+    if (authState === 'unauthenticated') {
         return <Navigate to="/login" replace />;
     }
 
+    // Only render protected content for authenticated users
     return <Outlet />;
 }

@@ -10,7 +10,11 @@ export default function RootRedirect() {
         if (hash && hash.includes('type=recovery')) {
             navigate(`/reset-password${hash}`, { replace: true });
         } else {
-            navigate('/login', { replace: true });
+            // Determine redirect based on auth state without triggering guards
+            const token =
+                localStorage.getItem('token') ||
+                sessionStorage.getItem('token');
+            navigate(token ? '/projects' : '/login', { replace: true });
         }
     }, [navigate]);
 
