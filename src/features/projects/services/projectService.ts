@@ -16,6 +16,6 @@ export const createProject = async (
             description: data.description,
         },
         useUserToken: true,
-        defaultErrorMessage: 'Failde to create project.',
+        defaultErrorMessage: 'Could not connect to the server. Please check your connection and try again.',
     });
 };

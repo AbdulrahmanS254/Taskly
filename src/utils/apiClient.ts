@@ -45,7 +45,13 @@ export async function apiRequest<T>({
         config.body = JSON.stringify(body);
     }
 
-    const response = await fetch(`${baseUrl}${endpoint}`, config);
+    let response: Response;
+
+    try {
+        response = await fetch(`${baseUrl}${endpoint}`, config);
+    } catch {
+        throw new Error(defaultErrorMessage);
+    }
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -60,5 +66,12 @@ export async function apiRequest<T>({
         return {} as T;
     }
 
-    return response.json();
+    const text = await response.text();
+
+    if (!text || text.trim() === '') {
+        return {} as T;
+    }
+
+    return JSON.parse(text) as T;
+
 }
