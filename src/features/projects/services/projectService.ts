@@ -4,6 +4,13 @@ import type { AddProjectData } from '../../auth/schemas/commonSchemas';
 const projectsURL =
     'https://dehomokujooddvosrpzj.supabase.co/rest/v1';
 
+export interface Project {
+    id: string;
+    name: string;
+    description: string | null;
+    created_at: string;
+}
+
 export const createProject = async (
     data: AddProjectData
 ): Promise<void> => {
@@ -17,5 +24,15 @@ export const createProject = async (
         },
         useUserToken: true,
         defaultErrorMessage: 'Could not connect to the server. Please check your connection and try again.',
+    });
+};
+
+export const getProjects = async (): Promise<Project[]> => {
+    return apiRequest<Project[]>({
+        baseUrl: projectsURL,
+        endpoint: '/projects',
+        method: 'GET',
+        useUserToken: true,
+        defaultErrorMessage: 'Failed to fetch projects. Please try again.',
     });
 };

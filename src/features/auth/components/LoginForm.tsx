@@ -32,7 +32,13 @@ export default function LoginForm() {
             
             navigate('/project');
         } catch (error: any) {
-            setServerError(error.message || 'Something went wrong.');
+            const isNetworkError =
+                error?.message?.includes('Failed to fetch');
+            // making sure it's not a network error
+            setServerError(
+                isNetworkError
+                    ? 'Unable to connect. Please try again later.'
+                    : error?.message || 'Invalid email or password.')
         }
     };
 
