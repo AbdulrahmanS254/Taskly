@@ -143,7 +143,7 @@ export default function Sidebar({
         };
 
         const items = [
-            { label: 'Projects', to: '/project', icon: IconProjects },
+            { label: 'Projects', to: '/projects', icon: IconProjects },
         ];
 
         if (projectId) {
@@ -215,7 +215,8 @@ export default function Sidebar({
                     </div>
 
                     <nav className="flex flex-col gap-1">
-                        {navItems.map(({ label, to, icon: Icon }) => (
+                        {navItems.map(({ label, to, icon: Icon }) => {
+                            return (
                             <NavLink
                                 key={to}
                                 to={to}
@@ -231,7 +232,8 @@ export default function Sidebar({
                                 <Icon />
                                 {showLabels && <span>{label}</span>}
                             </NavLink>
-                        ))}
+                        )
+                        } )}
                     </nav>
                 </div>
 
