@@ -62,7 +62,7 @@ export const router = createBrowserRouter([
                         element: <Navigate to="/projects" replace />,
                     },
                     {
-                        path: '/project/edit',
+                        path: '/project/:projectId/edit',
                         element: <EditProjectPage />,
                     },
                     {

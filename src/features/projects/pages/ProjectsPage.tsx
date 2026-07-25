@@ -89,7 +89,7 @@ export default function ProjectsPage() {
                     epics.
                 </p>
                 <button
-                    onClick={() => navigate('/projects/add')}
+                    onClick={() => navigate('/project/add')}
                     className="flex items-center gap-3 bg-linear-to-br from-primary to-primary-container text-white font-bold text-base md:text-lg px-8 py-4 rounded-sm shadow-[0px_25px_50px_-12px_rgba(0,61,155,0.3)] hover:opacity-90 transition cursor-pointer"
                 >
                     {/* Placeholder for Plus icon */}
@@ -189,7 +189,7 @@ export default function ProjectsPage() {
                         ))}
 
                         <button
-                            onClick={() => navigate('/projects/add')}
+                            onClick={() => navigate('/project/add')}
                             className="bg-white border-2 border-dashed border-surface-low h-55 rounded-lg flex flex-col items-center justify-center gap-4 hover:border-primary/40 transition cursor-pointer"
                         >
                             <div className="bg-[#f1f3ff] rounded-xl size-12 flex items-center justify-center">
