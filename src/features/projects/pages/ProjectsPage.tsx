@@ -5,6 +5,7 @@ import {
     type Project,
 } from '../services/projectService';
 import { clearAllAuthData } from '../../../utils/authHelpers';
+import { IconEdit, IconPlus, IconAlert, IconCalendar, IconChevronLeft, IconChevronRightLarge } from '../../../components/ui/icons';
 
 export default function ProjectsPage() {
     const navigate = useNavigate();
@@ -52,7 +53,7 @@ export default function ProjectsPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-150 text-center">
                 <div className="bg-error/10 rounded-xl size-16 flex items-center justify-center mb-6">
-                    {/* Placeholder for AlertTriangle icon */}
+                    <IconAlert className="size-8 text-error" />
                 </div>
                 <h3 className="text-xl font-semibold text-slate-900 mb-3">
                     Something went wrong
@@ -77,7 +78,7 @@ export default function ProjectsPage() {
             <div className="flex flex-col items-center justify-center min-h-150 text-center">
                 <div className="bg-[#f1f3ff] rounded-lg size-45 md:size-55 flex items-center justify-center mb-8 relative">
                     <div className="bg-[#d7e2ff] rounded-xl size-16 flex items-center justify-center shadow-[0px_20px_25px_-5px_rgba(4,27,60,0.05),0px_8px_10px_-6px_rgba(4,27,60,0.05)]">
-                        {/* Placeholder for FolderPlus icon */}
+                        <IconPlus className="size-8 text-primary" />
                     </div>
                 </div>
                 <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight mb-3">
@@ -92,7 +93,7 @@ export default function ProjectsPage() {
                     onClick={() => navigate('/project/add')}
                     className="flex items-center gap-3 bg-linear-to-br from-primary to-primary-container text-white font-bold text-base md:text-lg px-8 py-4 rounded-sm shadow-[0px_25px_50px_-12px_rgba(0,61,155,0.3)] hover:opacity-90 transition cursor-pointer"
                 >
-                    {/* Placeholder for Plus icon */}
+                    <IconPlus className="size-5" />
                     Create New Project
                 </button>
             </div>
@@ -116,7 +117,7 @@ export default function ProjectsPage() {
                     disabled={loading}
                     className="flex items-center gap-2 bg-linear-to-br from-primary to-primary-container text-white font-medium text-base px-6 py-3 rounded-sm shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05)] hover:opacity-90 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
                 >
-                    {/* Placeholder for Plus icon */}
+                    <IconPlus className="size-4" />
                     Create New Project
                 </button>
             </div>
@@ -151,20 +152,7 @@ export default function ProjectsPage() {
                                         className="p-1.5 text-slate-400 hover:text-primary transition"
                                         title="Edit Project"
                                     >
-                                        {/* SVG Edit Icon ==> to be edited*/}
-                                        <svg
-                                            className="size-4"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                            />
-                                        </svg>
+                                        <IconEdit />
                                     </button>
                                     <h3 className="text-lg font-medium text-slate-900 mb-2 line-clamp-1">
                                         {project.name}
@@ -179,7 +167,7 @@ export default function ProjectsPage() {
                                         Created at
                                     </span>
                                     <span className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
-                                        {/* Placeholder for CalendarDays icon */}
+                                        <IconCalendar className="size-4" />
                                         {formatDate(
                                             project.created_at
                                         )}
@@ -193,7 +181,7 @@ export default function ProjectsPage() {
                             className="bg-white border-2 border-dashed border-surface-low h-55 rounded-lg flex flex-col items-center justify-center gap-4 hover:border-primary/40 transition cursor-pointer"
                         >
                             <div className="bg-[#f1f3ff] rounded-xl size-12 flex items-center justify-center">
-                                {/* Placeholder for Plus icon */}
+                                <IconPlus className="size-6 text-primary" />
                             </div>
                             <span className="text-sm font-bold tracking-[1.4px] uppercase text-slate-500">
                                 Add Project
@@ -213,7 +201,7 @@ export default function ProjectsPage() {
                                 disabled
                                 className="size-8 flex items-center justify-center border border-surface-low rounded-sm text-slate-400 disabled:cursor-not-allowed"
                             >
-                                {/* Placeholder for ChevronLeft icon */}
+                                <IconChevronLeft />
                             </button>
                             <button className="size-8 flex items-center justify-center bg-primary border border-surface-low rounded-sm text-white text-xs font-bold">
                                 1
@@ -222,7 +210,7 @@ export default function ProjectsPage() {
                                 disabled
                                 className="size-8 flex items-center justify-center border border-surface-low rounded-sm text-slate-400 disabled:cursor-not-allowed"
                             >
-                                {/* Placeholder for ChevronRight icon */}
+                                <IconChevronRightLarge />
                             </button>
                         </div>
                     </div>

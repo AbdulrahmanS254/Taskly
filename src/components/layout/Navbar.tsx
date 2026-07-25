@@ -6,6 +6,7 @@ import {
 } from '../../features/auth/services/authService';
 import type { CurrentUser } from '../../features/auth/services/authService';
 import { clearAllAuthData } from '../../utils/authHelpers';
+import { IconMenu, IconLogout } from '../ui/icons';
 
 interface NavbarProps {
     onMenuClick: () => void;
@@ -78,18 +79,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                     onClick={onMenuClick}
                     className="md:hidden flex items-center justify-center p-2 rounded text-slate-900 cursor-pointer"
                 >
-                    <svg
-                        className="size-5"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            d="M2.5 5h15M2.5 10h15M2.5 15h15"
-                        />
-                    </svg>
+                    <IconMenu />
                 </button>
                 <span className="md:hidden font-bold text-slate-900 text-lg tracking-tight">
                     TASKLY
@@ -132,24 +122,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                             onClick={handleLogout}
                             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer font-medium"
                         >
-                            <svg
-                                className="size-4"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M7 4H4.5A1.5 1.5 0 003 5.5v9A1.5 1.5 0 004.5 16H7"
-                                />
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M13 13.5L17 10l-4-3.5M17 10H7"
-                                />
-                            </svg>
+                            <IconLogout className="size-4" />
                             Logout
                         </button>
                     </div>

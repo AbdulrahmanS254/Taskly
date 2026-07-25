@@ -7,6 +7,7 @@ import { SignUpSchema } from '../schemas/signUpSchema';
 import type { SignUpData } from '../schemas/signUpSchema';
 import { Input } from '../../../components/ui/Input';
 import { signUpUser } from '../services/authService';
+import { IconCheck } from '../../../components/ui/icons';
 
 export default function SignUpForm() {
     const navigate = useNavigate();
@@ -102,15 +103,15 @@ export default function SignUpForm() {
 
                 <div className="bg-surface-low content-stretch flex flex-col gap-2 items-start p-4 rounded-lg w-full">
                     <div className="flex gap-2 items-center w-full">
-                        <CheckDot active={hasMinLength} />
+                        <IconCheck active={hasMinLength} />
                         <span className="text-slate-900 text-xs">At least 8 characters</span>
                     </div>
                     <div className="flex gap-2 items-center w-full">
-                        <CheckDot active={hasUpperLowerDigit} />
+                        <IconCheck active={hasUpperLowerDigit} />
                         <span className="text-slate-900 text-xs">One uppercase, lowercase, and digit</span>
                     </div>
                     <div className="flex gap-2 items-center w-full">
-                        <CheckDot active={hasSpecialChar} />
+                        <IconCheck active={hasSpecialChar} />
                         <span className="text-slate-900 text-xs">One special character</span>
                     </div>
                 </div>
@@ -129,25 +130,5 @@ export default function SignUpForm() {
                 <NavLink to={"/login"} className="text-primary font-semibold cursor-pointer">Log in</NavLink>
             </div>
         </div>
-    );
-}
-
-function CheckDot({ active }: { active: boolean }) {
-    return (
-        <svg
-            className={`size-3 shrink-0 ${active ? 'text-success' : 'text-slate-300'}`}
-            viewBox="0 0 20 20"
-            fill="currentColor"
-        >
-            {active ? (
-                <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                />
-            ) : (
-                <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            )}
-        </svg>
     );
 }
