@@ -221,11 +221,12 @@ export default function Sidebar({
                                 key={to}
                                 to={to}
                                 onClick={onClose}
+                                end={to === '/projects'}
                                 className={({ isActive }) =>
                                     `flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition ${
                                         isActive
-                                            ? 'bg-white text-primary shadow-sm'
-                                            : 'text-slate-900'
+                                            ? 'bg-white text-primary shadow-sm font-semibold'
+                                            : 'text-slate-900 hover:bg-slate-100'
                                     } ${!showLabels ? 'justify-center' : ''}`
                                 }
                             >

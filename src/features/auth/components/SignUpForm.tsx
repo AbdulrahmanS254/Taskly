@@ -34,7 +34,7 @@ export default function SignUpForm() {
             if (result.access_token) {
                 localStorage.setItem('token', result.access_token);
             }
-            navigate('/project');
+            navigate('/projects');
         } catch (error: any) {
             setServerError(error.message || 'Something went wrong.');
         }

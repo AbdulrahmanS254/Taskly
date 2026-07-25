@@ -30,7 +30,7 @@ export default function LoginForm() {
                 localStorage.setItem('token', result.access_token);
             }
             
-            navigate('/project');
+            navigate('/projects');
         } catch (error: any) {
             const isNetworkError =
                 error?.message?.includes('Failed to fetch');
