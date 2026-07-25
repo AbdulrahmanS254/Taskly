@@ -1,4 +1,5 @@
-import { NavLink, useNavigate } from 'react-router';
+import { useMemo } from 'react';
+import { NavLink, useNavigate, useParams } from 'react-router';
 
 interface SidebarProps {
     open: boolean;
@@ -124,21 +125,54 @@ function IconChevron({ collapsed }: { collapsed: boolean }) {
     );
 }
 
-const navItems = [
-    { label: 'Projects', to: '/projects', icon: IconProjects },
-    { label: 'Project Epics', to: '/epics', icon: IconEpics },
-    { label: 'Project Tasks', to: '/tasks', icon: IconTasks },
-    { label: 'Project Members', to: '/members', icon: IconMembers },
-    { label: 'Project Details', to: '/details', icon: IconDetails },
-];
-
 export default function Sidebar({
     open,
     collapsed,
     onClose,
     onToggleCollapse,
 }: SidebarProps) {
+
     const navigate = useNavigate();
+    const { projectId } = useParams<{ projectId?: string }>();
+
+    const navItems = useMemo(() => {
+        const getProjectScopedPath = (path: string) => {
+            return projectId
+                ? `/project/${projectId}${path}`
+                : '/project';
+        };
+
+        const items = [
+            { label: 'Projects', to: '/project', icon: IconProjects },
+        ];
+
+        if (projectId) {
+            items.push(
+                {
+                    label: 'Project Epics',
+                    to: getProjectScopedPath('/epics'),
+                    icon: IconEpics,
+                },
+                {
+                    label: 'Project Tasks',
+                    to: getProjectScopedPath('/tasks'),
+                    icon: IconTasks,
+                },
+                {
+                    label: 'Project Members',
+                    to: getProjectScopedPath('/members'),
+                    icon: IconMembers,
+                },
+                {
+                    label: 'Project Details',
+                    to: getProjectScopedPath('/details'),
+                    icon: IconDetails,
+                }
+            );
+        }
+
+        return items;
+    }, [projectId]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');

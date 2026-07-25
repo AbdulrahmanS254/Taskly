@@ -70,19 +70,23 @@ export const router = createBrowserRouter([
                         element: <AddProjectPage />,
                     },
                     {
-                        path: '/epics',
+                        path: '/project/:projectId',
+                        element: <Navigate to="epics" replace />,
+                    },
+                    {
+                        path: '/project/:projectId/epics',
                         element: <div>Project Epics Content</div>,
                     },
                     {
-                        path: '/tasks',
+                        path: '/project/:projectId/tasks',
                         element: <div>Project Tasks Content</div>,
                     },
                     {
-                        path: '/members',
+                        path: '/project/:projectId/members',
                         element: <div>Project Members Content</div>,
                     },
                     {
-                        path: '/details',
+                        path: '/project/:projectId/details',
                         element: <div>Project Details Content</div>,
                     },
                 ],

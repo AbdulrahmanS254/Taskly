@@ -112,7 +112,7 @@ export default function ProjectsPage() {
                     </p>
                 </div>
                 <button
-                    onClick={() => navigate('/projects/add')}
+                    onClick={() => navigate('/project/add')}
                     disabled={loading}
                     className="flex items-center gap-2 bg-linear-to-br from-primary to-primary-container text-white font-medium text-base px-6 py-3 rounded-sm shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05)] hover:opacity-90 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
                 >
@@ -135,37 +135,37 @@ export default function ProjectsPage() {
                                 key={project.id}
                                 onClick={() =>
                                     navigate(
-                                        `/projects/${project.id}`
+                                        `/project/${project.id}/epics`
                                     )
                                 }
                                 className="bg-white rounded-lg p-6 h-55 flex flex-col justify-between shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] hover:shadow-md transition cursor-pointer"
                             >
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        navigate(
-                                            `/project/${project.id}/edit`
-                                        );
-                                    }}
-                                    className="p-1.5 text-slate-400 hover:text-primary transition"
-                                    title="Edit Project"
-                                >
-                                    {/* SVG Edit Icon ==> to be edited*/}
-                                    <svg
-                                        className="size-4"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
+                                <div className="flex flex-col items-start justify-between gap-2 mb-2">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(
+                                                `/project/${project.id}/edit`
+                                            );
+                                        }}
+                                        className="p-1.5 text-slate-400 hover:text-primary transition"
+                                        title="Edit Project"
                                     >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                        />
-                                    </svg>
-                                </button>
-                                <div>
+                                        {/* SVG Edit Icon ==> to be edited*/}
+                                        <svg
+                                            className="size-4"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                            />
+                                        </svg>
+                                    </button>
                                     <h3 className="text-lg font-medium text-slate-900 mb-2 line-clamp-1">
                                         {project.name}
                                     </h3>
