@@ -1,8 +1,4 @@
-import {
-    NavLink,
-    useNavigate,
-    useParams,
-} from 'react-router';
+import { NavLink, useNavigate, useParams } from 'react-router';
 
 interface SidebarProps {
     open: boolean;
