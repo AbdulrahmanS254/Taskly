@@ -36,3 +36,31 @@ export const getProjects = async (): Promise<Project[]> => {
         defaultErrorMessage: 'Failed to fetch projects. Please try again.',
     });
 };
+
+
+// Update Project
+export async function getProjectById(projectId: string): Promise<Project> {
+    const projects = await apiRequest<Project[]>({
+        endpoint: `/rest/v1/projects?id=eq.${projectId}&select=*`,
+        method: 'GET',
+        useUserToken: true,
+    });
+    
+    if (!projects || projects.length === 0) {
+        throw new Error('Project not found');
+    }
+    
+    return projects[0];
+}
+
+export async function updateProject(
+    projectId: string, 
+    data: { name: string; description: string }
+): Promise<void> {
+    await apiRequest({
+        endpoint: `/rest/v1/projects?id=eq.${projectId}`,
+        method: 'PATCH',
+        body: data,
+        useUserToken: true,
+    });
+}

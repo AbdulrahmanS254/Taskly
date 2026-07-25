@@ -4,7 +4,7 @@ const API_ANON_KEY =
 interface RequestOptions {
     baseUrl?: string;
     endpoint: string;
-    method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     body?: any;
     useUserToken?: boolean;
     customToken?: string;

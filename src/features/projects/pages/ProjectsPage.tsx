@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { getProjects, type Project } from '../services/projectService';
+import {
+    getProjects,
+    type Project,
+} from '../services/projectService';
 import { clearAllAuthData } from '../../../utils/authHelpers';
 
 export default function ProjectsPage() {
@@ -16,7 +19,10 @@ export default function ProjectsPage() {
             const data = await getProjects();
             setProjects(data);
         } catch (err: any) {
-            if (err?.message?.includes('401') || err?.message?.includes('Unauthorized')) {
+            if (
+                err?.message?.includes('401') ||
+                err?.message?.includes('Unauthorized')
+            ) {
                 clearAllAuthData();
                 navigate('/login');
                 return;
@@ -34,7 +40,9 @@ export default function ProjectsPage() {
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         const day = date.getDate();
-        const month = date.toLocaleString('en-US', { month: 'short' });
+        const month = date.toLocaleString('en-US', {
+            month: 'short',
+        });
         const year = date.getFullYear();
         return `${day} ${month} ${year}`;
     };
@@ -50,7 +58,8 @@ export default function ProjectsPage() {
                     Something went wrong
                 </h3>
                 <p className="text-slate-500 text-base max-w-[320px] mb-8">
-                    We're having trouble retrieving your projects right now. Please try again in a moment.
+                    We're having trouble retrieving your projects
+                    right now. Please try again in a moment.
                 </p>
                 <button
                     onClick={fetchProjects}
@@ -75,7 +84,9 @@ export default function ProjectsPage() {
                     No Projects
                 </h2>
                 <p className="text-slate-500 text-base md:text-lg max-w-md mb-8">
-                    You don't have any projects yet. Start by defining your first workspace to begin tracking tasks and epics.
+                    You don't have any projects yet. Start by defining
+                    your first workspace to begin tracking tasks and
+                    epics.
                 </p>
                 <button
                     onClick={() => navigate('/projects/add')}
@@ -93,8 +104,12 @@ export default function ProjectsPage() {
         <div className="space-y-10">
             <div className="flex items-end justify-between gap-4">
                 <div className="space-y-1">
-                    <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Projects</h1>
-                    <p className="text-slate-500 text-base">Manage and curate your projects</p>
+                    <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
+                        Projects
+                    </h1>
+                    <p className="text-slate-500 text-base">
+                        Manage and curate your projects
+                    </p>
                 </div>
                 <button
                     onClick={() => navigate('/projects/add')}
@@ -118,15 +133,45 @@ export default function ProjectsPage() {
                         {projects.map((project) => (
                             <div
                                 key={project.id}
-                                onClick={() => navigate(`/projects/${project.id}`)}
+                                onClick={() =>
+                                    navigate(
+                                        `/projects/${project.id}`
+                                    )
+                                }
                                 className="bg-white rounded-lg p-6 h-55 flex flex-col justify-between shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] hover:shadow-md transition cursor-pointer"
                             >
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(
+                                            `/project/${project.id}/edit`
+                                        );
+                                    }}
+                                    className="p-1.5 text-slate-400 hover:text-primary transition"
+                                    title="Edit Project"
+                                >
+                                    {/* SVG Edit Icon ==> to be edited*/}
+                                    <svg
+                                        className="size-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                        />
+                                    </svg>
+                                </button>
                                 <div>
                                     <h3 className="text-lg font-medium text-slate-900 mb-2 line-clamp-1">
                                         {project.name}
                                     </h3>
                                     <p className="text-sm text-slate-500 leading-[1.4] line-clamp-3">
-                                        {project.description || 'No description'}
+                                        {project.description ||
+                                            'No description'}
                                     </p>
                                 </div>
                                 <div className="border-t border-surface-low pt-4 flex items-center justify-between">
@@ -135,7 +180,9 @@ export default function ProjectsPage() {
                                     </span>
                                     <span className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
                                         {/* Placeholder for CalendarDays icon */}
-                                        {formatDate(project.created_at)}
+                                        {formatDate(
+                                            project.created_at
+                                        )}
                                     </span>
                                 </div>
                             </div>
@@ -157,7 +204,9 @@ export default function ProjectsPage() {
                     {/* Footer / Pagination */}
                     <div className="flex items-center justify-between border-t border-surface-low pt-4">
                         <p className="text-xs font-medium text-slate-500">
-                            Showing {projects.length} of {projects.length} active project{projects.length !== 1 ? 's' : ''}
+                            Showing {projects.length} of{' '}
+                            {projects.length} active project
+                            {projects.length !== 1 ? 's' : ''}
                         </p>
                         <div className="flex items-center gap-2">
                             <button
