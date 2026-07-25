@@ -9,6 +9,7 @@ import ResetPasswordPage from '../features/auth/pages/ResetPasswordPage';
 import RootRedirect from './guards/RootRedirect.tsx';
 import AddProjectPage from '../features/projects/pages/AddProjectPage.tsx';
 import ProjectsPage from '../features/projects/pages/ProjectsPage.tsx';
+import EditProjectPage from '../features/projects/pages/EditProjectPage.tsx';
 
 /**
  * Router Configuration:
@@ -59,6 +60,10 @@ export const router = createBrowserRouter([
                     {
                         path: '/project',
                         element: <Navigate to="/projects" replace />,
+                    },
+                    {
+                        path: '/project/edit',
+                        element: <EditProjectPage />,
                     },
                     {
                         path: '/project/add',

@@ -55,7 +55,7 @@ export async function getProjectById(projectId: string): Promise<Project> {
 
 export async function updateProject(
     projectId: string, 
-    data: { name: string; description: string }
+    data: { name: string; description?: string | undefined }
 ): Promise<void> {
     await apiRequest({
         endpoint: `/rest/v1/projects?id=eq.${projectId}`,
