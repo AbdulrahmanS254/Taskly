@@ -9,6 +9,12 @@ interface RequestOptions {
     useUserToken?: boolean;
     customToken?: string;
     defaultErrorMessage?: string;
+    headers?: Record<string, string>; // to pass custom headers
+}
+
+export interface ApiResponse<T> {
+    data: T;
+    headers: Headers;
 }
 
 export async function apiRequest<T>({
@@ -19,7 +25,32 @@ export async function apiRequest<T>({
     useUserToken = false,
     customToken,
     defaultErrorMessage = 'Request failed. Please try again.',
+    headers = {},
 }: RequestOptions): Promise<T> {
+    const responseWithHeaders = await apiRequestWithHeaders<T>({
+        baseUrl,
+        endpoint,
+        method,
+        body,
+        useUserToken,
+        customToken,
+        defaultErrorMessage,
+        headers,
+    });
+
+    return responseWithHeaders.data;
+}
+
+export async function apiRequestWithHeaders<T>({
+    baseUrl = 'https://dehomokujooddvosrpzj.supabase.co',
+    endpoint,
+    method = 'POST',
+    body,
+    useUserToken = false,
+    customToken,
+    defaultErrorMessage = 'Request failed. Please try again.',
+    headers = {},
+}: RequestOptions): Promise<ApiResponse<T>> {
     let authToken = API_ANON_KEY;
 
     if (customToken) {
@@ -38,6 +69,7 @@ export async function apiRequest<T>({
             'Content-Type': 'application/json',
             apikey: API_ANON_KEY,
             Authorization: `Bearer ${authToken}`,
+            ...headers, // 👈 دمج الـ Custom Headers مع الـ Default Headers
         },
     };
 
@@ -63,15 +95,17 @@ export async function apiRequest<T>({
     }
 
     if (response.status === 204) {
-        return {} as T;
+        return { data: {} as T, headers: response.headers };
     }
 
     const text = await response.text();
 
     if (!text || text.trim() === '') {
-        return {} as T;
+        return { data: {} as T, headers: response.headers };
     }
 
-    return JSON.parse(text) as T;
-
+    return {
+        data: JSON.parse(text) as T,
+        headers: response.headers,
+    };
 }

@@ -5,17 +5,14 @@ export const IconChevronLeft = ({ className = 'size-8', size, ...props }: IconPr
         <svg
             className={className}
             style={size ? { width: size, height: size } : undefined}
-            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 5 7"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
             {...props}
         >
-            <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M7.5 5l-5 5 5 5"
-            />
+            <path d="M3.5 7L0 3.5L3.5 0L4.31667 0.816667L1.63333 3.5L4.31667 6.18333L3.5 7Z" fill="#434654"/>
         </svg>
     );
 };
