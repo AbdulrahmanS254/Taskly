@@ -1,5 +1,7 @@
-import { useEffect, useState, useRef, useCallback } from 'react'; // 👈 إضافة useCallback هنا
+import { useEffect, useState, useCallback } from 'react'; // 👈 إضافة useCallback هنا
 import { useNavigate } from 'react-router';
+import { useInfiniteScroll } from '../../../hooks/useInfiniteScroll';
+import { Pagination } from '../../../components/ui/Pagination';
 import {
     getProjects,
     type Project,
@@ -10,8 +12,6 @@ import {
     IconPlus,
     IconAlert,
     IconCalendar,
-    IconChevronLeft,
-    IconChevronRight,
 } from '../../../components/ui/icons';
 
 const LIMIT = 9;
@@ -24,18 +24,6 @@ export default function ProjectsPage() {
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    const [isMobile, setIsMobile] = useState(false);
-    const observerTarget = useRef<HTMLDivElement | null>(null);
-
-    useEffect(() => {
-        const checkMobile = () =>
-            setIsMobile(window.innerWidth < 768);
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () =>
-            window.removeEventListener('resize', checkMobile);
-    }, []);
 
     const totalPages = Math.ceil(totalCount / LIMIT);
 
@@ -78,56 +66,22 @@ export default function ProjectsPage() {
         [navigate]
     );
 
+    const { isMobile, observerTarget } = useInfiniteScroll(
+        loading,
+        loadingMore,
+        page < totalPages,
+        () => {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchProjects(nextPage, true);
+        }
+    );
+
     useEffect(() => {
         if (!isMobile) {
             fetchProjects(page, false);
         }
     }, [page, isMobile, fetchProjects]);
-
-    useEffect(() => {
-        if (isMobile) {
-            setPage(1);
-            fetchProjects(1, false);
-        }
-    }, [isMobile, fetchProjects]);
-
-    useEffect(() => {
-        if (!isMobile) return;
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (
-                    entries[0].isIntersecting &&
-                    !loading &&
-                    !loadingMore &&
-                    page < totalPages
-                ) {
-                    const nextPage = page + 1;
-                    setPage(nextPage);
-                    fetchProjects(nextPage, true);
-                }
-            },
-            { threshold: 0.5 }
-        );
-
-        const currentTarget = observerTarget.current;
-        if (currentTarget) {
-            observer.observe(currentTarget);
-        }
-
-        return () => {
-            if (currentTarget) {
-                observer.unobserve(currentTarget);
-            }
-        };
-    }, [
-        isMobile,
-        loading,
-        loadingMore,
-        page,
-        totalPages,
-        fetchProjects,
-    ]);
 
     const handlePageChange = (newPage: number) => {
         if (
@@ -288,7 +242,7 @@ export default function ProjectsPage() {
                                 }
                                 className="bg-primary border-2 border-surface-low h-13.5 w-13.5 rounded-xl flex flex-col items-center justify-center hover:border-primary/40 transition cursor-pointer fixed right-6 bottom-10"
                             >
-                                    <IconPlus className="size-6 text-white" />
+                                <IconPlus className="size-6 text-white" />
                             </button>
                         ) : (
                             <button
@@ -308,72 +262,25 @@ export default function ProjectsPage() {
                     </div>
 
                     {/* Infinite Scroll*/}
+                    {/* Infinite Scroll trigger area for Mobile */}
                     {isMobile && page < totalPages && (
                         <div
                             ref={observerTarget}
                             className="py-6 flex justify-center"
                         >
-                            {loadingMore && (
-                                <p className="text-sm font-medium text-slate-500 animate-pulse">
-                                    Loading more projects...
-                                </p>
-                            )}
+                            {loadingMore && <p>Loading...</p>}
                         </div>
                     )}
 
                     {/* Desktop Pagination */}
-                    {!isMobile && totalPages > 1 && (
-                        <div className="flex items-center justify-between border-t border-surface-low pt-4">
-                            <p className="text-xs font-medium text-slate-500">
-                                Showing {projects.length} of{' '}
-                                {totalCount} active project
-                                {totalCount !== 1 ? 's' : ''}
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() =>
-                                        handlePageChange(page - 1)
-                                    }
-                                    disabled={page === 1}
-                                    className="size-8 flex items-center justify-center border border-surface-low rounded-sm text-slate-500 hover:bg-slate-50 disabled:text-slate-300 disabled:bg-transparent disabled:cursor-not-allowed transition cursor-pointer"
-                                >
-                                    <IconChevronLeft />
-                                </button>
-
-                                {Array.from({
-                                    length: totalPages,
-                                }).map((_, index) => {
-                                    const pageNum = index + 1;
-                                    return (
-                                        <button
-                                            key={pageNum}
-                                            onClick={() =>
-                                                handlePageChange(
-                                                    pageNum
-                                                )
-                                            }
-                                            className={`size-8 flex items-center justify-center border border-surface-low rounded-sm text-xs font-bold transition cursor-pointer ${
-                                                page === pageNum
-                                                    ? 'bg-primary text-white'
-                                                    : 'bg-white text-slate-700 hover:bg-slate-50'
-                                            }`}
-                                        >
-                                            {pageNum}
-                                        </button>
-                                    );
-                                })}
-
-                                <button
-                                    onClick={() =>
-                                        handlePageChange(page + 1)
-                                    }
-                                    disabled={page === totalPages}
-                                    className="size-8 flex items-center justify-center border border-surface-low rounded-sm text-slate-500 hover:bg-slate-50 disabled:text-slate-300 disabled:bg-transparent disabled:cursor-not-allowed transition cursor-pointer"
-                                >
-                                    <IconChevronRight />
-                                </button>
-                            </div>
-                        </div>
+                    {!isMobile && (
+                        <Pagination
+                            page={page}
+                            totalPages={totalPages}
+                            totalCount={totalCount}
+                            itemName="project"
+                            onPageChange={handlePageChange}
+                        />
                     )}
                 </>
             )}
