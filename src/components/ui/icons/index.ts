@@ -19,5 +19,4 @@ export { IconLightbulb } from './IconLightbulb';
 export { IconLogo } from './IconLogo';
 export { IconProjectCheck } from './IconProjectCheck';
 export { IconChevronLeft } from './IconChevronLeft';
-export { IconChevronRightLarge } from './IconChevronRightLarge';
 export type { IconProps } from './types';

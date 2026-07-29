@@ -1,14 +1,13 @@
 import type { IconProps } from './types';
 
-export const IconChevronLeft = ({ className = 'size-8', size, ...props }: IconProps) => {
+export const IconChevronLeft = ({ className = 'size-2.5 shrink-0', size, ...props }: IconProps) => {
     return (
         <svg
             className={className}
             style={size ? { width: size, height: size } : undefined}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 5 7"
-            fill="none"
-            stroke="currentColor"
+            fill="currentColor"
             strokeWidth="1.5"
             {...props}
         >
