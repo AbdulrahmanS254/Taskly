@@ -44,9 +44,7 @@ export function useInfiniteScroll(
         }
 
         return () => {
-            if (currentTarget) {
-                observer.unobserve(currentTarget);
-            }
+            observer.disconnect();
         };
     }, [isMobile, loading, loadingMore, hasMore, onLoadMore]);
 
