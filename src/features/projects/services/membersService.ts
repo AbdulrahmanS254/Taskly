@@ -1,11 +1,24 @@
 import { apiRequest } from '../../../utils/apiClient';
 
-export interface ProjectMember {
-    id: string;
+// interface for the metadata --> cleaner structure
+export interface ProjectMemberMetadata {
+    sub?: string;
     name: string;
     email: string;
-    role: 'Owner' | 'Admin' | 'Member' | 'Viewer';
+    job_title?: string;
+    email_verified?: boolean;
+    phone_verified?: boolean;
     avatar_url?: string | null;
+}
+
+// The main member interface matching the Supabase response
+export interface ProjectMember {
+    member_id: string;
+    project_id: string;
+    user_id: string;
+    role: 'owner' | 'admin' | 'member' | 'viewer';
+    email: string;
+    metadata: ProjectMemberMetadata;
 }
 
 export const getProjectMembers = async (
