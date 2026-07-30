@@ -159,24 +159,37 @@ export default function ProjectsPage() {
     // ---------- Loaded / loading (header always visible) ----------
     return (
         <div className="space-y-10">
-            <div className="flex items-end justify-between gap-4">
-                <div className="space-y-1">
-                    <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
-                        Projects
-                    </h1>
-                    <p className="text-slate-500 text-base">
-                        Manage and curate your projects
-                    </p>
+            {!isMobile ? (
+                <div className="flex items-end justify-between gap-4">
+                    <div className="space-y-1">
+                        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
+                            Projects
+                        </h1>
+                        <p className="text-slate-500 text-base">
+                            Manage and curate your projects
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => navigate('/project/add')}
+                        disabled={loading}
+                        className="flex items-center gap-2 bg-linear-to-br from-primary to-primary-container text-white font-medium text-base px-6 py-3 rounded-sm shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05)] hover:opacity-90 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
+                    >
+                        <IconPlus className="size-4" />
+                        Create New Project
+                    </button>
                 </div>
-                <button
-                    onClick={() => navigate('/project/add')}
-                    disabled={loading}
-                    className="flex items-center gap-2 bg-linear-to-br from-primary to-primary-container text-white font-medium text-base px-6 py-3 rounded-sm shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05)] hover:opacity-90 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
-                >
-                    <IconPlus className="size-4" />
-                    Create New Project
-                </button>
-            </div>
+            ) : (
+                <div className="flex items-end justify-between gap-4">
+                    <div className="space-y-1">
+                        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
+                            Projects
+                        </h1>
+                        <p className="text-slate-500 text-base">
+                            Manage and curate your projects
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
