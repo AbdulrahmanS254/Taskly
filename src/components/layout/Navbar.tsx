@@ -7,17 +7,10 @@ import {
 import type { CurrentUser } from '../../features/auth/services/authService';
 import { clearAllAuthData } from '../../utils/authHelpers';
 import { IconMenu, IconLogout } from '../ui/icons';
+import { getInitials } from '../../utils/helpers';
 
 interface NavbarProps {
     onMenuClick: () => void;
-}
-
-function getInitials(name?: string) {
-    if (!name) return '';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length > 1)
-        return (parts[0][0] + parts[1][0]).toUpperCase();
-    return parts[0].slice(0, 2).toUpperCase();
 }
 
 export default function Navbar({ onMenuClick }: NavbarProps) {

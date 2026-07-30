@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { getProjectMembers, type ProjectMember } from '../services/membersService';
+import { getInitials } from '../../../utils/helpers';
 
 export default function ProjectMembersPage() {
     // Extract projectId 
