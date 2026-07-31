@@ -10,6 +10,7 @@ import RootRedirect from './guards/RootRedirect.tsx';
 import AddProjectPage from '../features/projects/pages/AddProjectPage.tsx';
 import ProjectsPage from '../features/projects/pages/ProjectsPage.tsx';
 import EditProjectPage from '../features/projects/pages/EditProjectPage.tsx';
+import ProjectMembersPage from '../features/projects/pages/ProjectMembersPage.tsx';
 
 /**
  * Router Configuration:
@@ -83,7 +84,7 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: '/project/:projectId/members',
-                        element: <div>Project Members Content</div>,
+                        element: <ProjectMembersPage />,
                     },
                     {
                         path: '/project/:projectId/details',

@@ -1,42 +1,98 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react'; // 👈 إضافة useCallback هنا
 import { useNavigate } from 'react-router';
+import { useInfiniteScroll } from '../../../hooks/useInfiniteScroll';
+import { Pagination } from '../../../components/ui/Pagination';
 import {
     getProjects,
     type Project,
 } from '../services/projectService';
 import { clearAllAuthData } from '../../../utils/authHelpers';
-import { IconEdit, IconPlus, IconAlert, IconCalendar, IconChevronLeft, IconChevronRightLarge } from '../../../components/ui/icons';
+import {
+    IconEdit,
+    IconPlus,
+    IconAlert,
+    IconCalendar,
+} from '../../../components/ui/icons';
+
+const LIMIT = 9;
 
 export default function ProjectsPage() {
     const navigate = useNavigate();
     const [projects, setProjects] = useState<Project[]>([]);
+    const [page, setPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchProjects = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const data = await getProjects();
-            setProjects(data);
-        } catch (err: any) {
-            if (
-                err?.message?.includes('401') ||
-                err?.message?.includes('Unauthorized')
-            ) {
-                clearAllAuthData();
-                navigate('/login');
-                return;
+    const totalPages = Math.ceil(totalCount / LIMIT);
+
+    const fetchProjects = useCallback(
+        async (currentPage: number, append = false) => {
+            if (append) {
+                setLoadingMore(true);
+            } else {
+                setLoading(true);
             }
-            setError(err?.message || 'Failed to load projects');
-        } finally {
-            setLoading(false);
+            setError(null);
+
+            try {
+                const { data, totalCount: total } = await getProjects(
+                    currentPage,
+                    LIMIT
+                );
+
+                setTotalCount(total);
+                if (append) {
+                    setProjects((prev) => [...prev, ...data]);
+                } else {
+                    setProjects(data);
+                }
+            } catch (err: any) {
+                if (
+                    err?.message?.includes('401') ||
+                    err?.message?.includes('Unauthorized')
+                ) {
+                    clearAllAuthData();
+                    navigate('/login');
+                    return;
+                }
+                setError(err?.message || 'Failed to load projects');
+            } finally {
+                setLoading(false);
+                setLoadingMore(false);
+            }
+        },
+        [navigate]
+    );
+
+    const { isMobile, observerTarget } = useInfiniteScroll(
+        loading,
+        loadingMore,
+        page < totalPages,
+        () => {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchProjects(nextPage, true);
         }
-    };
+    );
 
     useEffect(() => {
-        fetchProjects();
-    }, []);
+        if (!isMobile) {
+            fetchProjects(page, false);
+        }
+    }, [page, isMobile, fetchProjects]);
+
+    const handlePageChange = (newPage: number) => {
+        if (
+            newPage >= 1 &&
+            newPage <= totalPages &&
+            newPage !== page
+        ) {
+            setPage(newPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -63,7 +119,7 @@ export default function ProjectsPage() {
                     right now. Please try again in a moment.
                 </p>
                 <button
-                    onClick={fetchProjects}
+                    onClick={() => fetchProjects(page, false)}
                     className="bg-primary text-white font-semibold text-base px-6 py-2.5 rounded-sm shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] hover:opacity-90 transition cursor-pointer"
                 >
                     Retry Connection
@@ -73,7 +129,7 @@ export default function ProjectsPage() {
     }
 
     // ---------- Empty state ----------
-    if (!loading && projects.length === 0) {
+    if (!loading && totalCount === 0) {
         return (
             <div className="flex flex-col items-center justify-center min-h-150 text-center">
                 <div className="bg-[#f1f3ff] rounded-lg size-45 md:size-55 flex items-center justify-center mb-8 relative">
@@ -82,7 +138,7 @@ export default function ProjectsPage() {
                     </div>
                 </div>
                 <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight mb-3">
-                    No Projects
+                    No Projects Found
                 </h2>
                 <p className="text-slate-500 text-base md:text-lg max-w-md mb-8">
                     You don't have any projects yet. Start by defining
@@ -103,28 +159,41 @@ export default function ProjectsPage() {
     // ---------- Loaded / loading (header always visible) ----------
     return (
         <div className="space-y-10">
-            <div className="flex items-end justify-between gap-4">
-                <div className="space-y-1">
-                    <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
-                        Projects
-                    </h1>
-                    <p className="text-slate-500 text-base">
-                        Manage and curate your projects
-                    </p>
+            {!isMobile ? (
+                <div className="flex items-end justify-between gap-4">
+                    <div className="space-y-1">
+                        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
+                            Projects
+                        </h1>
+                        <p className="text-slate-500 text-base">
+                            Manage and curate your projects
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => navigate('/project/add')}
+                        disabled={loading}
+                        className="flex items-center gap-2 bg-linear-to-br from-primary to-primary-container text-white font-medium text-base px-6 py-3 rounded-sm shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05)] hover:opacity-90 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
+                    >
+                        <IconPlus className="size-4" />
+                        Create New Project
+                    </button>
                 </div>
-                <button
-                    onClick={() => navigate('/project/add')}
-                    disabled={loading}
-                    className="flex items-center gap-2 bg-linear-to-br from-primary to-primary-container text-white font-medium text-base px-6 py-3 rounded-sm shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05)] hover:opacity-90 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
-                >
-                    <IconPlus className="size-4" />
-                    Create New Project
-                </button>
-            </div>
+            ) : (
+                <div className="flex items-end justify-between gap-4">
+                    <div className="space-y-1">
+                        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
+                            Projects
+                        </h1>
+                        <p className="text-slate-500 text-base">
+                            Manage and curate your projects
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {Array.from({ length: 6 }).map((_, i) => (
+                    {Array.from({ length: LIMIT }).map((_, i) => (
                         <ProjectSkeleton key={i} />
                     ))}
                 </div>
@@ -141,22 +210,25 @@ export default function ProjectsPage() {
                                 }
                                 className="bg-white rounded-lg p-6 h-55 flex flex-col justify-between shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] hover:shadow-md transition cursor-pointer"
                             >
-                                <div className="flex flex-col items-start justify-between gap-2 mb-2">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(
-                                                `/project/${project.id}/edit`
-                                            );
-                                        }}
-                                        className="p-1.5 text-slate-400 hover:text-primary transition"
-                                        title="Edit Project"
-                                    >
-                                        <IconEdit />
-                                    </button>
-                                    <h3 className="text-lg font-medium text-slate-900 mb-2 line-clamp-1">
-                                        {project.name}
-                                    </h3>
+                                <div>
+                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                        <h3 className="text-lg font-medium text-slate-900 line-clamp-1">
+                                            {project.name}
+                                        </h3>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(
+                                                    `/project/${project.id}/edit`
+                                                );
+                                            }}
+                                            className="p-1 text-slate-400 hover:text-primary transition shrink-0 cursor-pointer"
+                                            title="Edit Project"
+                                        >
+                                            <IconEdit />
+                                        </button>
+                                    </div>
                                     <p className="text-sm text-slate-500 leading-[1.4] line-clamp-3">
                                         {project.description ||
                                             'No description'}
@@ -176,50 +248,59 @@ export default function ProjectsPage() {
                             </div>
                         ))}
 
-                        <button
-                            onClick={() => navigate('/project/add')}
-                            className="bg-white border-2 border-dashed border-surface-low h-55 rounded-lg flex flex-col items-center justify-center gap-4 hover:border-primary/40 transition cursor-pointer"
-                        >
-                            <div className="bg-[#f1f3ff] rounded-xl size-12 flex items-center justify-center">
-                                <IconPlus className="size-6 text-primary" />
-                            </div>
-                            <span className="text-sm font-bold tracking-[1.4px] uppercase text-slate-500">
-                                Add Project
-                            </span>
-                        </button>
+                        {isMobile ? (
+                            <button
+                                onClick={() =>
+                                    navigate('/project/add')
+                                }
+                                className="bg-primary border-2 border-surface-low h-13.5 w-13.5 rounded-xl flex flex-col items-center justify-center hover:border-primary/40 transition cursor-pointer fixed right-6 bottom-10"
+                            >
+                                <IconPlus className="size-6 text-white" />
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() =>
+                                    navigate('/project/add')
+                                }
+                                className="bg-white border-2 border-dashed border-surface-low h-55 rounded-lg flex flex-col items-center justify-center gap-4 hover:border-primary/40 transition cursor-pointer"
+                            >
+                                <div className="bg-[#f1f3ff] rounded-xl size-12 flex items-center justify-center">
+                                    <IconPlus className="size-6 text-primary" />
+                                </div>
+                                <span className="text-sm font-bold tracking-[1.4px] uppercase text-slate-500">
+                                    Add Project
+                                </span>
+                            </button>
+                        )}
                     </div>
 
-                    {/* Footer / Pagination */}
-                    <div className="flex items-center justify-between border-t border-surface-low pt-4">
-                        <p className="text-xs font-medium text-slate-500">
-                            Showing {projects.length} of{' '}
-                            {projects.length} active project
-                            {projects.length !== 1 ? 's' : ''}
-                        </p>
-                        <div className="flex items-center gap-2">
-                            <button
-                                disabled
-                                className="size-8 flex items-center justify-center border border-surface-low rounded-sm text-slate-400 disabled:cursor-not-allowed"
-                            >
-                                <IconChevronLeft />
-                            </button>
-                            <button className="size-8 flex items-center justify-center bg-primary border border-surface-low rounded-sm text-white text-xs font-bold">
-                                1
-                            </button>
-                            <button
-                                disabled
-                                className="size-8 flex items-center justify-center border border-surface-low rounded-sm text-slate-400 disabled:cursor-not-allowed"
-                            >
-                                <IconChevronRightLarge />
-                            </button>
+                    {/* Infinite Scroll*/}
+                    {/* Infinite Scroll trigger area for Mobile */}
+                    {isMobile && page < totalPages && (
+                        <div
+                            ref={observerTarget}
+                            className="py-6 flex justify-center"
+                        >
+                            {loadingMore && <p>Loading...</p>}
                         </div>
-                    </div>
+                    )}
+
+                    {/* Desktop Pagination */}
+                    {!isMobile && (
+                        <Pagination
+                            page={page}
+                            totalPages={totalPages}
+                            totalCount={totalCount}
+                            itemName="project"
+                            onPageChange={handlePageChange}
+                        />
+                    )}
                 </>
             )}
         </div>
     );
 }
-    // needs to be moved to a separate component
+
 function ProjectSkeleton() {
     return (
         <div className="bg-white rounded-lg p-6 h-55 flex flex-col justify-between shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] animate-pulse">
