@@ -1,21 +1,24 @@
 import { apiRequest } from '../../../utils/apiClient';
-import { type AddEpicData } from '../schemas/epicSchema';
-const projectsURL = 'https://dehomokujooddvosrpzj.supabase.co/rest/v1';
-
+import { type CreateEpicFormData } from '../schemas/epicSchema';
+const projectsURL =
+    'https://dehomokujooddvosrpzj.supabase.co/rest/v1';
 
 export const createEpic = async (
-    data: AddEpicData
+    data: CreateEpicFormData
 ): Promise<void> => {
     return apiRequest<void>({
         baseUrl: projectsURL,
         endpoint: '/epics',
         method: 'POST',
         body: {
-            name: data.name,
+            title: data.title,
             description: data.description,
-            assignee_id: data.assignee_id,
+            assignee_id:
+                data.assignee_id && data.assignee_id.trim() !== ''
+                    ? data.assignee_id
+                    : null,
             project_id: data.project_id,
-            deadline: data.deadline,
+            deadline: data.deadline?.trim() ? data.deadline : null,
         },
         useUserToken: true,
         defaultErrorMessage:

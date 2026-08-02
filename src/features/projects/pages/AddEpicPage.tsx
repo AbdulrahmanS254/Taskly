@@ -243,7 +243,7 @@ export default function AddEpicPage() {
                                 {...register('assignee_id')}
                                 disabled={isLoadingMembers}
                                 defaultValue=""
-                                className="w-full bg-surface-highest border-2 border-transparent rounded-lg md:rounded px-4 py-3 h-12 text-base text-slate-900 focus:outline-none focus:border-primary transition disabled:opacity-60 appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:12px] cursor-pointer"
+                                className="w-full bg-surface-highest border-2 border-transparent rounded-lg md:rounded px-4 py-3 h-12 text-base text-slate-900 focus:outline-none focus:border-primary transition disabled:opacity-60 appearance-none bg-no-repeat bg-position-[right_1rem_center] bg-size-[12px] cursor-pointer"
                                 style={{
                                     backgroundImage:
                                         "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23434654' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")",
@@ -309,7 +309,7 @@ export default function AddEpicPage() {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full md:w-auto flex items-center justify-center gap-2 bg-gradient-to-br from-primary to-primary-container text-white font-bold text-sm px-8 py-4 md:py-3 rounded-lg md:rounded shadow-[0px_10px_15px_-3px_rgba(0,61,155,0.2),0px_4px_6px_-4px_rgba(0,61,155,0.2)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                            className="w-full md:w-auto flex items-center justify-center gap-2 bg-linear-to-br from-primary to-primary-container text-white font-bold text-sm px-8 py-4 md:py-3 rounded-lg md:rounded shadow-[0px_10px_15px_-3px_rgba(0,61,155,0.2),0px_4px_6px_-4px_rgba(0,61,155,0.2)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
                             {isSubmitting ? 'Creating...' : 'Create Epic'}
                         </button>

@@ -1,14 +1,14 @@
 import z from "zod";
-import { projectNameSchema, projectDescriptionSchema, optionalStringSchema,optionalIdSchema, dateSchema } from "../../auth/schemas/commonSchemas";
+import { projectNameSchema, projectDescriptionSchema, optionalIdSchema, dateSchema } from "../../auth/schemas/commonSchemas";
 
 
 export const addEpicSchema = z.object({
-    name: projectNameSchema,
+    title: projectNameSchema,
     description: projectDescriptionSchema,
-    assignee_id: optionalStringSchema,
+    assignee_id: optionalIdSchema,
     project_id: optionalIdSchema,
     deadline: dateSchema,
 });
 
 
-export type AddEpicData = z.infer<typeof addEpicSchema>;
+export type CreateEpicFormData = z.infer<typeof addEpicSchema>;
