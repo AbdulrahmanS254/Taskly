@@ -79,6 +79,10 @@ export const router = createBrowserRouter([
                         element: <div>Project Epics Content</div>,
                     },
                     {
+                        path: '/project/:projectId/epics/new',
+                        element: <div>You create an epic here</div>,
+                    },
+                    {
                         path: '/project/:projectId/tasks',
                         element: <div>Project Tasks Content</div>,
                     },

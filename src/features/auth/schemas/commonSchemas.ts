@@ -55,4 +55,11 @@ export const addProjectSchema = z.object({
     description: projectDescriptionSchema,
 });
 
+export const addEpicShema = z.object({
+    name: projectNameSchema,
+    description: projectDescriptionSchema,
+});
+
 export type AddProjectData = z.infer<typeof addProjectSchema>;
+
+export type AddEpicData = z.infer<typeof addEpicShema>;
