@@ -11,6 +11,7 @@ import AddProjectPage from '../features/projects/pages/AddProjectPage.tsx';
 import ProjectsPage from '../features/projects/pages/ProjectsPage.tsx';
 import EditProjectPage from '../features/projects/pages/EditProjectPage.tsx';
 import ProjectMembersPage from '../features/projects/pages/ProjectMembersPage.tsx';
+import AddEpicPage from '../features/projects/pages/AddEpicPage.tsx';
 
 /**
  * Router Configuration:
@@ -80,7 +81,7 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: '/project/:projectId/epics/new',
-                        element: <div>You create an epic here</div>,
+                        element: <AddEpicPage />,
                     },
                     {
                         path: '/project/:projectId/tasks',
