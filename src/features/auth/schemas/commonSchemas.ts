@@ -6,6 +6,7 @@ const nameRegex =
 const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_+\-\[\]\\\/`~#;=]).+$/;
 
+/* == LOGIN & SIGNUP == */
 export const emailSchema = z
     .string()
     .min(1, 'Email is required')
@@ -55,11 +56,41 @@ export const addProjectSchema = z.object({
     description: projectDescriptionSchema,
 });
 
-export const addEpicShema = z.object({
-    name: projectNameSchema,
-    description: projectDescriptionSchema,
-});
+// EPICS
+
+// Not Required Field Helper
+export const optionalStringSchema = (maxChars = 500) =>
+    z
+        .string()
+        .trim()
+        .max(maxChars, `Must not exceed ${maxChars} characters`)
+        .optional()
+        .nullable()
+        .or(z.literal(''));
+
+// (Optional Select/UUIDs)
+export const optionalIdSchema = z
+    .string()
+    .optional()
+    .nullable()
+    .or(z.literal(''));
+
+// Date Validation (Today or Future)
+export const dateSchema = z
+    .string()
+    .optional()
+    .nullable()
+    .or(z.literal(''))
+    .refine((val) => {
+        if (!val) return true;
+        const selectedDate = new Date(val);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return selectedDate >= today;
+    }, {
+        message: 'Deadline must be today or a future date',
+    });
 
 export type AddProjectData = z.infer<typeof addProjectSchema>;
 
-export type AddEpicData = z.infer<typeof addEpicShema>;
+
