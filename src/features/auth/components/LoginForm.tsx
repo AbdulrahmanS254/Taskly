@@ -7,6 +7,7 @@ import { LoginSchema } from '../schemas/loginSchema';
 import type { LoginData } from '../schemas/loginSchema';
 import { Input } from '../../../components/ui/Input';
 import { loginUser } from '../services/authService';
+import { setCookie } from '../../../utils/cookies';
 
 export default function LoginForm() {
     const navigate = useNavigate();
@@ -27,7 +28,9 @@ export default function LoginForm() {
             const result = await loginUser(data);
             
             if (result.access_token) {
-                localStorage.setItem('token', result.access_token);
+                setCookie('token', result.access_token, {
+                    session: !data.rememberMe,
+                });
             }
             
             navigate('/projects');

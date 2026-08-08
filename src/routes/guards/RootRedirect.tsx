@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { getCookie } from '../../utils/cookies';
 
 export default function RootRedirect() {
     const navigate = useNavigate();
@@ -11,9 +12,7 @@ export default function RootRedirect() {
             navigate(`/reset-password${hash}`, { replace: true });
         } else {
             // Determine redirect based on auth state without triggering guards
-            const token =
-                localStorage.getItem('token') ||
-                sessionStorage.getItem('token');
+            const token = getCookie('token');
             navigate(token ? '/projects' : '/login', { replace: true });
         }
     }, [navigate]);

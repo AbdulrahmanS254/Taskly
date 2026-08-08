@@ -288,9 +288,9 @@ export default function ProjectsPage() {
                     {/* Desktop Pagination */}
                     {!isMobile && (
                         <Pagination
-                            page={page}
-                            totalPages={totalPages}
+                            currentPage={page}
                             totalCount={totalCount}
+                            pageSize={LIMIT}
                             itemName="project"
                             onPageChange={handlePageChange}
                         />

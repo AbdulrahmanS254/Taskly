@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
 import { getProjectEpics, type Epic } from '../services/epicService';
@@ -6,6 +6,8 @@ import { getProjectById } from '../services/projectService';
 import { clearAllAuthData } from '../../../utils/authHelpers';
 import { getInitials } from '../../../utils/helpers';
 import { Pagination } from '../../../components/ui/Pagination';
+import { useInfiniteScroll } from '../../../hooks/useInfiniteScroll';
+import EpicDetailsModal from '../components/EpicDetailsModal';
 import {
     IconPlus,
     IconAlert,
@@ -29,10 +31,9 @@ function isUnauthorizedError(err: unknown): boolean {
     );
 }
 
-// Figma shows 6 epics per page ("Showing 6 of 24 epics"). The listing
-// endpoint returns the full set for the project, so pagination here is
-// applied client-side purely to drive the UI — no server paging yet.
 const PAGE_SIZE = 6;
+
+type FetchMode = 'replace' | 'append';
 
 function formatDate(dateString: string) {
     const date = new Date(dateString);
@@ -50,48 +51,71 @@ export default function ProjectEpicsPage() {
         null
     );
     const [epics, setEpics] = useState<Epic[]>([]);
-    const [page, setPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedEpicId, setSelectedEpicId] = useState<
+        string | null
+    >(null);
 
-    const totalCount = epics.length;
-    const totalPages = Math.ceil(totalCount / PAGE_SIZE);
-    const visibleEpics = epics.slice(
-        (page - 1) * PAGE_SIZE,
-        page * PAGE_SIZE
-    );
+    // Guards against duplicate in-flight requests (e.g. fast mobile scrolling).
+    const isFetchingRef = useRef(false);
 
-    const fetchEpics = useCallback(async () => {
-        if (!projectId) {
-            setError('Project ID is missing from the URL.');
-            setLoading(false);
-            return;
-        }
+    const hasMore = epics.length < totalCount;
 
-        setLoading(true);
-        setError(null);
-
-        try {
-            const data = await getProjectEpics(projectId);
-            setEpics(data);
-            setPage(1);
-        } catch (err: unknown) {
-            if (isUnauthorizedError(err)) {
-                clearAllAuthData();
-                navigate('/login');
+    const loadEpics = useCallback(
+        async (targetPage: number, mode: FetchMode) => {
+            if (!projectId) {
+                setError('Project ID is missing from the URL.');
+                setLoading(false);
                 return;
             }
-            setError(
-                getErrorMessage(err, 'Failed to load project epics')
-            );
-        } finally {
-            setLoading(false);
-        }
-    }, [projectId, navigate]);
+
+            if (isFetchingRef.current) return;
+            isFetchingRef.current = true;
+
+            if (mode === 'replace') setLoading(true);
+            else setLoadingMore(true);
+            setError(null);
+
+            try {
+                const { epics: data, totalCount: count } =
+                    await getProjectEpics(
+                        projectId,
+                        targetPage,
+                        PAGE_SIZE
+                    );
+                setTotalCount(count);
+                setCurrentPage(targetPage);
+                setEpics((prev) =>
+                    mode === 'append' ? [...prev, ...data] : data
+                );
+            } catch (err: unknown) {
+                if (isUnauthorizedError(err)) {
+                    clearAllAuthData();
+                    navigate('/login');
+                    return;
+                }
+                setError(
+                    getErrorMessage(
+                        err,
+                        'Failed to load project epics'
+                    )
+                );
+            } finally {
+                setLoading(false);
+                setLoadingMore(false);
+                isFetchingRef.current = false;
+            }
+        },
+        [projectId, navigate]
+    );
 
     useEffect(() => {
-        fetchEpics();
-    }, [fetchEpics]);
+        loadEpics(1, 'replace');
+    }, [loadEpics]);
 
     useEffect(() => {
         if (!projectId) return;
@@ -101,15 +125,37 @@ export default function ProjectEpicsPage() {
     }, [projectId]);
 
     const handlePageChange = (newPage: number) => {
+        const totalPages = Math.ceil(totalCount / PAGE_SIZE);
         if (
             newPage >= 1 &&
             newPage <= totalPages &&
-            newPage !== page
+            newPage !== currentPage
         ) {
-            setPage(newPage);
+            loadEpics(newPage, 'replace');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
+
+    // Patch the edited epic in place so the list reflects inline edits without
+    // refetching (which would drop pages accumulated by mobile infinite scroll).
+    const handleEpicUpdated = useCallback((updatedEpic: Epic) => {
+        setEpics((prev) =>
+            prev.map((item) =>
+                item.id === updatedEpic.id ? updatedEpic : item
+            )
+        );
+    }, []);
+
+    const handleLoadMore = useCallback(() => {
+        loadEpics(currentPage + 1, 'append');
+    }, [currentPage, loadEpics]);
+
+    const { isMobile, observerTarget } = useInfiniteScroll(
+        loading,
+        loadingMore,
+        hasMore,
+        handleLoadMore
+    );
 
     return (
         <div className="space-y-8 relative">
@@ -127,10 +173,6 @@ export default function ProjectEpicsPage() {
                         <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">
                             Project Epics
                         </h1>
-                        <p className="text-slate-500 text-base">
-                            Track high-level milestones for{' '}
-                            {projectName || 'this project'}
-                        </p>
                     </div>
                 </div>
                 <button
@@ -148,7 +190,7 @@ export default function ProjectEpicsPage() {
             {/* Error state */}
             {error && (
                 <div className="flex flex-col items-center justify-center min-h-100 text-center">
-                    <div className="bg-error/10 rounded-xl size-16 flex items-center justify-center mb-6">
+                    <div className="bg-[#ffdad6] rounded-xl size-16 flex items-center justify-center mb-6">
                         <IconAlert className="size-8 text-error" />
                     </div>
                     <h3 className="text-xl font-semibold text-slate-900 mb-3">
@@ -159,7 +201,9 @@ export default function ProjectEpicsPage() {
                         epics right now. Please try again in a moment.
                     </p>
                     <button
-                        onClick={() => fetchEpics()}
+                        onClick={() =>
+                            loadEpics(currentPage, 'replace')
+                        }
                         className="bg-primary text-white font-semibold text-base px-6 py-2.5 rounded-sm shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] hover:opacity-90 transition cursor-pointer"
                     >
                         Retry Connection
@@ -189,18 +233,41 @@ export default function ProjectEpicsPage() {
             {!error && !loading && totalCount > 0 && (
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {visibleEpics.map((epic) => (
-                            <EpicCard key={epic.id} epic={epic} />
+                        {epics.map((epic) => (
+                            <EpicCard
+                                key={epic.id}
+                                epic={epic}
+                                onSelect={() =>
+                                    setSelectedEpicId(epic.id)
+                                }
+                            />
                         ))}
                     </div>
 
-                    <Pagination
-                        page={page}
-                        totalPages={totalPages}
-                        totalCount={totalCount}
-                        itemName="epic"
-                        onPageChange={handlePageChange}
-                    />
+                    {/* Desktop: server-side page navigation */}
+                    <div className="hidden md:block">
+                        <Pagination
+                            currentPage={currentPage}
+                            totalCount={totalCount}
+                            pageSize={PAGE_SIZE}
+                            itemName="epic"
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+
+                    {/* Mobile: infinite scroll */}
+                    {isMobile && (
+                        <div
+                            ref={observerTarget}
+                            className="md:hidden flex justify-center py-4"
+                        >
+                            {loadingMore && (
+                                <span className="text-xs font-medium text-slate-500 animate-pulse">
+                                    Loading more epics...
+                                </span>
+                            )}
+                        </div>
+                    )}
 
                     {/* Mobile floating action button */}
                     <button
@@ -215,17 +282,43 @@ export default function ProjectEpicsPage() {
                     </button>
                 </>
             )}
+
+            {/* Epic details modal */}
+            <EpicDetailsModal
+                isOpen={selectedEpicId !== null}
+                onClose={() => setSelectedEpicId(null)}
+                projectId={projectId ?? ''}
+                epicId={selectedEpicId}
+                onEpicUpdated={handleEpicUpdated}
+            />
         </div>
     );
 }
 
-function EpicCard({ epic }: { epic: Epic }) {
+function EpicCard({
+    epic,
+    onSelect,
+}: {
+    epic: Epic;
+    onSelect: () => void;
+}) {
     const hasDeadline = Boolean(epic.deadline);
 
     return (
-        <div className="bg-white border-l-4 border-l-[#004e32] rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] pl-5 pr-4 py-4 flex flex-col justify-between gap-6">
+        <div
+            onClick={onSelect}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onSelect();
+                }
+            }}
+            className="bg-white border-l-4 border-l-[#004e32] rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] pl-5 pr-4 py-4 flex flex-col justify-between gap-6 cursor-pointer hover:shadow-[0px_4px_12px_0px_rgba(4,27,60,0.08)] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
             <div className="flex items-start justify-between">
-                <span className="bg-success text-[#005235] text-[10px] font-bold tracking-wide px-2.5 py-1 rounded-sm">
+                <span className="bg-success text-[#005235] text-[10px] font-bold tracking-[0.5px] px-2.5 py-1 rounded-sm">
                     {epic.epic_id}
                 </span>
                 <svg
@@ -244,7 +337,7 @@ function EpicCard({ epic }: { epic: Epic }) {
                     {epic.title}
                 </h3>
 
-                {epic.assignee ? (
+                {epic.assignee?.name ? (
                     <div className="flex items-center gap-3">
                         <div className="bg-[#65dca4] text-[#002113] flex items-center justify-center rounded-xl size-10 font-bold text-sm shrink-0">
                             {getInitials(epic.assignee.name)}
@@ -299,22 +392,29 @@ function EpicCard({ epic }: { epic: Epic }) {
 }
 
 function EpicCardSkeleton() {
+    const bar = 'bg-[#e8edff] rounded-sm';
+
     return (
-        <div className="bg-white rounded-lg shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] pl-5 pr-4 py-4 flex flex-col gap-6 animate-pulse">
-            <div className="flex items-center justify-between">
-                <div className="h-5 w-20 bg-surface-highest rounded-sm" />
-                <div className="h-8 w-8 bg-surface-highest rounded" />
+        <div className="bg-white rounded-lg shadow-[0px_24px_24px_-12px_rgba(4,27,60,0.04)] p-4 flex flex-col gap-4 animate-pulse">
+            <div className="flex items-start justify-between">
+                <div
+                    className={`h-5 w-20 opacity-40 rounded ${bar}`}
+                />
+                <div className={`size-8 rounded-xl ${bar}`} />
             </div>
-            <div className="space-y-6">
-                <div className="h-6 w-full bg-surface-highest rounded" />
-                <div className="flex items-center gap-3">
-                    <div className="size-10 bg-surface-highest rounded-xl shrink-0" />
-                    <div className="h-4 w-32 bg-surface-highest rounded" />
+            <div className={`h-6 w-full ${bar}`} />
+            <div className="flex items-center gap-3 pt-4">
+                <div
+                    className={`size-8 rounded-xl shrink-0 ${bar}`}
+                />
+                <div className={`h-4 w-32 ${bar}`} />
+            </div>
+            <div className="flex flex-col gap-2 pt-2">
+                <div className={`h-1.5 w-full ${bar}`} />
+                <div className="flex items-center justify-between">
+                    <div className={`h-3 w-12 ${bar}`} />
+                    <div className={`h-3 w-12 ${bar}`} />
                 </div>
-            </div>
-            <div className="border-t border-surface-low pt-4 flex items-center justify-between">
-                <div className="h-3 w-24 bg-surface-highest rounded" />
-                <div className="h-3 w-24 bg-surface-highest rounded" />
             </div>
         </div>
     );
@@ -344,25 +444,28 @@ const emptyStateTips = [
 function EmptyEpicsState({ onCreate }: { onCreate: () => void }) {
     return (
         <div className="flex flex-col items-center justify-center text-center py-16 md:py-20">
-            <div className="bg-[#f1f3ff] rounded-2xl size-40 md:size-56 flex items-center justify-center mb-8">
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white shadow-[0px_25px_50px_-12px_rgba(0,61,155,0.1)] rounded-lg size-14 md:size-16 flex items-center justify-center">
-                        <IconEpics className="size-6 text-primary" />
-                    </div>
-                    <div className="bg-surface-highest rounded-lg size-14 md:size-16 flex items-center justify-center">
-                        <IconTasks className="size-6 text-primary" />
-                    </div>
-                    <div className="bg-surface-highest rounded-lg size-14 md:size-16 flex items-center justify-center">
-                        <IconMembers className="size-6 text-primary" />
-                    </div>
-                    <div className="border-2 border-dashed border-primary/20 bg-primary/5 rounded-lg size-14 md:size-16 flex items-center justify-center">
-                        <IconDetails className="size-6 text-primary" />
+            <div className="relative mb-8">
+                <div className="absolute inset-4 bg-[#e0e8ff] rounded-full blur-2xl opacity-50" />
+                <div className="relative bg-white shadow-[0px_25px_50px_-12px_rgba(0,61,155,0.1)] rounded-4xl size-40 md:size-56 flex items-center justify-center">
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-primary-container/20 rounded-lg size-14 md:size-16 flex items-center justify-center">
+                            <IconEpics className="size-6 text-primary" />
+                        </div>
+                        <div className="bg-surface-highest rounded-lg size-14 md:size-16 flex items-center justify-center">
+                            <IconTasks className="size-6 text-primary" />
+                        </div>
+                        <div className="bg-surface-highest rounded-lg size-14 md:size-16 flex items-center justify-center">
+                            <IconMembers className="size-6 text-primary" />
+                        </div>
+                        <div className="border-2 border-dashed border-primary/20 bg-primary/5 rounded-lg size-14 md:size-16 flex items-center justify-center">
+                            <IconDetails className="size-6 text-primary" />
+                        </div>
                     </div>
                 </div>
             </div>
 
             <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight mb-3">
-                No epics in this project yet.
+                No epics found for this project
             </h2>
             <p className="text-slate-500 text-base md:text-lg max-w-md mb-8">
                 Break down your large project into manageable epics to

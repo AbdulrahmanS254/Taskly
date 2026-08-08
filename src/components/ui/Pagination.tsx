@@ -1,9 +1,9 @@
 import { IconChevronLeft, IconChevronRight } from './icons';
 
 interface PaginationProps {
-    page: number;
-    totalPages: number;
+    currentPage: number;
     totalCount: number;
+    pageSize: number;
     itemName?: string;
     onPageChange: (newPage: number) => void;
 }
@@ -12,24 +12,26 @@ const paginationArrowBtn =
     'size-8 flex items-center justify-center border border-surface-low rounded-sm text-slate-500 hover:bg-slate-50 disabled:text-slate-300 disabled:bg-transparent disabled:cursor-not-allowed transition cursor-pointer';
 
 export function Pagination({
-    page,
-    totalPages,
+    currentPage,
     totalCount,
+    pageSize,
     itemName = 'item',
     onPageChange,
 }: PaginationProps) {
+    const totalPages = Math.ceil(totalCount / pageSize);
+
     if (totalPages <= 1) return null;
 
     return (
         <div className="flex items-center justify-between border-t border-surface-low pt-4">
             <p className="text-xs font-medium text-slate-500">
-                Showing {totalCount} active {itemName}
+                Showing {pageSize} of {totalCount} {itemName}
                 {totalCount !== 1 ? 's' : ''}
             </p>
             <div className="flex items-center gap-2">
                 <button
-                    onClick={() => onPageChange(page - 1)}
-                    disabled={page === 1}
+                    onClick={() => onPageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
                     className={paginationArrowBtn}
                 >
                     <IconChevronLeft />
@@ -43,7 +45,7 @@ export function Pagination({
                                 key={pageNum}
                                 onClick={() => onPageChange(pageNum)}
                                 className={`size-8 flex items-center justify-center border border-surface-low rounded-sm text-xs font-bold transition cursor-pointer ${
-                                    page === pageNum
+                                    currentPage === pageNum
                                         ? 'bg-primary text-white'
                                         : 'bg-white text-slate-700 hover:bg-slate-50'
                                 }`}
@@ -55,8 +57,8 @@ export function Pagination({
                 )}
 
                 <button
-                    onClick={() => onPageChange(page + 1)}
-                    disabled={page === totalPages}
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
                     className={paginationArrowBtn}
                 >
                     <IconChevronRight />

@@ -10,6 +10,7 @@ import {
     IconChevron,
     IconLogo,
 } from '../ui/icons';
+import { clearAllAuthData } from '../../utils/authHelpers';
 
 interface SidebarProps {
     open: boolean;
@@ -69,8 +70,7 @@ export default function Sidebar({
     }, [projectId]);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
+        clearAllAuthData();
         navigate('/login');
     };
 

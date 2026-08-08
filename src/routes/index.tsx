@@ -78,7 +78,7 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: '/project/:projectId/epics',
-                        element: <div>Project Epics Content</div>,
+                        element: <ProjectEpicsPage />,
                     },
                     {
                         path: '/project/:projectId/epics/new',
@@ -86,7 +86,7 @@ export const router = createBrowserRouter([
                     },
                     {
                         path: '/project/:projectId/tasks',
-                        element: <ProjectEpicsPage />,
+                        element: <div>Project Tasks Content</div>,
                     },
                     {
                         path: '/project/:projectId/members',

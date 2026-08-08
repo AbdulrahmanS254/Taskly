@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router';
 import { getCurrentUser } from '../../features/auth/services/authService';
 import { clearAllAuthData } from '../../utils/authHelpers';
+import { getCookie } from '../../utils/cookies';
 
 /**
  * ProtectedRoute: Handles async authentication verification
@@ -14,9 +15,7 @@ export default function ProtectedRoute() {
 
     useEffect(() => {
         const verifyAuth = async () => {
-            const token =
-                localStorage.getItem('token') ||
-                sessionStorage.getItem('token');
+            const token = getCookie('token');
 
             if (!token) {
                 setAuthState('unauthenticated');

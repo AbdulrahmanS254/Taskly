@@ -8,6 +8,7 @@ import type { SignUpData } from '../schemas/signUpSchema';
 import { Input } from '../../../components/ui/Input';
 import { signUpUser } from '../services/authService';
 import { IconCheck } from '../../../components/ui/icons';
+import { setCookie } from '../../../utils/cookies';
 
 export default function SignUpForm() {
     const navigate = useNavigate();
@@ -33,7 +34,7 @@ export default function SignUpForm() {
         try {
             const result = await signUpUser(data);
             if (result.access_token) {
-                localStorage.setItem('token', result.access_token);
+                setCookie('token', result.access_token);
             }
             navigate('/projects');
         } catch (error: any) {

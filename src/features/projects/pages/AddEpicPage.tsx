@@ -93,12 +93,14 @@ export default function AddEpicPage() {
                 deadline: '',
             });
             setShowSuccess(true);
-        } catch (error: any) {
-            const isNetworkError = error?.message?.includes('Failed to fetch');
+        } catch (error: unknown) {
+            const message =
+                error instanceof Error ? error.message : undefined;
+            const isNetworkError = message?.includes('Failed to fetch');
             setServerError(
                 isNetworkError
                     ? 'Unable to connect. Please try again later.'
-                    : error?.message || 'Failed to create epic.'
+                    : message || 'Failed to create epic.'
             );
         }
     };
@@ -257,7 +259,7 @@ export default function AddEpicPage() {
                                 {members.map((member) => (
                                     <option
                                         key={member.member_id}
-                                        value={member.member_id}
+                                        value={member.user_id}
                                     >
                                         {member.metadata?.name || member.email}
                                     </option>

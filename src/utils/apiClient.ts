@@ -1,3 +1,5 @@
+import { getCookie } from './cookies';
+
 const API_ANON_KEY =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlaG9tb2t1am9vZGR2b3NycHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1OTgxNzcsImV4cCI6MjA5OTE3NDE3N30.3OXdhRdh5nMyni05dhfQiVJvU1WXeLKLVAEiUq5X8z4';
 
@@ -56,9 +58,7 @@ export async function apiRequestWithHeaders<T>({
     if (customToken) {
         authToken = customToken;
     } else if (useUserToken) {
-        const userToken =
-            localStorage.getItem('token') ||
-            sessionStorage.getItem('token');
+        const userToken = getCookie('token');
         if (!userToken) throw new Error('No active token found');
         authToken = userToken;
     }
