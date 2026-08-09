@@ -8,7 +8,6 @@ import {
 } from '../services/projectService';
 import { clearAllAuthData } from '../../../utils/authHelpers';
 import {
-    IconEdit,
     IconPlus,
     IconAlert,
     IconCalendar,
@@ -215,19 +214,6 @@ export default function ProjectsPage() {
                                         <h3 className="text-lg font-medium text-slate-900 line-clamp-1">
                                             {project.name}
                                         </h3>
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                navigate(
-                                                    `/project/${project.id}/edit`
-                                                );
-                                            }}
-                                            className="p-1 text-slate-400 hover:text-primary transition shrink-0 cursor-pointer"
-                                            title="Edit Project"
-                                        >
-                                            <IconEdit />
-                                        </button>
                                     </div>
                                     <p className="text-sm text-slate-500 leading-[1.4] line-clamp-3">
                                         {project.description ||
