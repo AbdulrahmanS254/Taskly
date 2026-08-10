@@ -13,6 +13,7 @@ import EditProjectPage from '../features/projects/pages/EditProjectPage.tsx';
 import ProjectMembersPage from '../features/projects/pages/ProjectMembersPage.tsx';
 import AddEpicPage from '../features/projects/pages/AddEpicPage.tsx';
 import ProjectEpicsPage from '../features/projects/pages/ProjectEpicsPage.tsx';
+import AddTaskPage from '../features/projects/pages/AddTaskPage.tsx';
 
 /**
  * Router Configuration:
@@ -87,6 +88,10 @@ export const router = createBrowserRouter([
                     {
                         path: '/project/:projectId/tasks',
                         element: <div>Project Tasks Content</div>,
+                    },
+                    {
+                        path: '/project/:projectId/tasks/new',
+                        element: <AddTaskPage />,
                     },
                     {
                         path: '/project/:projectId/members',
