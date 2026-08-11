@@ -43,6 +43,7 @@ export const projectNameSchema = z
     .min(1, 'Project title is required')
     .min(3, 'Project title must be at least 3 characters')
     .max(100, 'Project title must be at most 100 characters');
+
 // DISC
 export const projectDescriptionSchema = z
     .string()
@@ -55,6 +56,8 @@ export const addProjectSchema = z.object({
     name: projectNameSchema,
     description: projectDescriptionSchema,
 });
+
+export type AddProjectData = z.infer<typeof addProjectSchema>;
 
 // EPICS
 
@@ -76,21 +79,36 @@ export const optionalIdSchema = z
     .or(z.literal(''));
 
 // Date Validation (Today or Future)
-export const dateSchema = z
+export const futureDateSchema = z
     .string()
     .optional()
     .nullable()
     .or(z.literal(''))
-    .refine((val) => {
-        if (!val) return true;
-        const selectedDate = new Date(val);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return selectedDate >= today;
-    }, {
-        message: 'Deadline must be today or a future date',
-    });
+    .refine(
+        (val) => {
+            if (!val) return true;
+            const selectedDate = new Date(val);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return selectedDate >= today;
+        },
+        {
+            message: 'Deadline must be today or a future date',
+        }
+    );
 
-export type AddProjectData = z.infer<typeof addProjectSchema>;
-
-
+// Date Validation
+export const dueDateSchema = z
+    .string()
+    .optional()
+    .nullable()
+    .or(z.literal(''))
+    .refine(
+        (val) => {
+            if (!val) return true;
+            const selectedDate = new Date(val);
+            const validDate = selectedDate.getTime();
+            return !isNaN(validDate);
+        },
+        { message: 'Date is not valid' }
+    );

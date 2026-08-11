@@ -1,5 +1,5 @@
 import z from "zod";
-import { projectNameSchema, projectDescriptionSchema, optionalIdSchema, dateSchema } from "../../auth/schemas/commonSchemas";
+import { projectNameSchema, projectDescriptionSchema, optionalIdSchema, futureDateSchema } from "../../auth/schemas/commonSchemas";
 
 
 export const addEpicSchema = z.object({
@@ -7,7 +7,7 @@ export const addEpicSchema = z.object({
     description: projectDescriptionSchema,
     assignee_id: optionalIdSchema,
     project_id: optionalIdSchema,
-    deadline: dateSchema,
+    deadline: futureDateSchema,
 });
 
 
