@@ -1,3 +1,4 @@
+import { useNavigate, useParams } from 'react-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -28,27 +29,17 @@ interface EpicDetailsModalProps {
     onClose: () => void;
     projectId: string;
     epicId: string | null;
-    // Receives the updated epic so the parent list can patch it in place.
-    // A plain `() => void` handler is still assignable here.
     onEpicUpdated?: (updatedEpic: Epic) => void;
 }
 
 type EditableField =
-    | 'title'
-    | 'description'
-    | 'assignee_id'
-    | 'deadline';
+    'title' | 'description' | 'assignee_id' | 'deadline';
 
 const metaLabel =
     'text-[10px] font-bold uppercase leading-[15px] text-slate-900/40';
 const metaBox =
     'flex items-center gap-2 border border-surface-highest rounded-lg p-2';
 
-/**
- * Date-only strings (YYYY-MM-DD) are returned as-is: routing them through
- * `new Date()` treats them as UTC midnight and shifts the day backwards in
- * negative-offset timezones.
- */
 function parseDate(value: string): Date | null {
     const dateOnly = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (dateOnly) {
@@ -89,8 +80,6 @@ function getErrorMessage(err: unknown, fallback: string): string {
     return fallback;
 }
 
-// The result is tagged with the epic it belongs to, so a result left over from
-// a previously opened epic is never rendered against a newly selected one.
 interface DetailsResult {
     epicId: string;
     loading: boolean;
@@ -109,8 +98,6 @@ export default function EpicDetailsModal({
     const [members, setMembers] = useState<ProjectMember[]>([]);
     const [membersLoading, setMembersLoading] = useState(false);
 
-    // Tracks the most recent request so a slow earlier response can't
-    // overwrite a newer one.
     const latestRequestRef = useRef<string | null>(null);
 
     const fetchDetails = useCallback(async () => {
@@ -222,7 +209,7 @@ export default function EpicDetailsModal({
                 role="dialog"
                 aria-modal="true"
                 aria-label="Epic details"
-                className="bg-white w-full max-w-[672px] max-h-[90vh] rounded-lg shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
+                className="bg-white w-full max-w-2xl max-h-[90vh] rounded-lg shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
             >
                 {/* Header */}
                 <div className="border-b border-slate-300/15 px-5 pt-6 pb-6 md:px-8 md:pt-8 shrink-0">
@@ -235,7 +222,7 @@ export default function EpicDetailsModal({
                             type="button"
                             onClick={onClose}
                             aria-label="Close epic details"
-                            className="size-[30px] rounded-xl flex items-center justify-center text-slate-500 hover:bg-surface-low transition cursor-pointer shrink-0"
+                            className="size-7.5 rounded-xl flex items-center justify-center text-slate-500 hover:bg-surface-low transition cursor-pointer shrink-0"
                         >
                             <IconClose />
                         </button>
@@ -302,8 +289,8 @@ function EpicDetailsBody({
     onEpicPatched,
     onEpicUpdated,
 }: EpicDetailsBodyProps) {
-    // Draft values drive the inputs; `epic` always holds the last saved state,
-    // so it doubles as the comparison baseline and the revert target.
+    const navigate = useNavigate();
+    const { projectId } = useParams<{ projectId: string }>();
     const [title, setTitle] = useState(epic.title);
     const [description, setDescription] = useState(
         epic.description ?? ''
@@ -316,8 +303,7 @@ function EpicDetailsBody({
     );
     const [savingField, setSavingField] =
         useState<EditableField | null>(null);
-    const [isEditingAssignee, setIsEditingAssignee] =
-        useState(false);
+    const [isEditingAssignee, setIsEditingAssignee] = useState(false);
 
     const saveField = async (
         field: EditableField,
@@ -333,9 +319,7 @@ function EpicDetailsBody({
             onEpicUpdated?.({ ...epic, ...patch });
         } catch {
             revert();
-            toast.error(
-                'Failed to update epic. Please try again.'
-            );
+            toast.error('Failed to update epic. Please try again.');
         } finally {
             setSavingField(null);
         }
@@ -429,7 +413,7 @@ function EpicDetailsBody({
                 placeholder="No description provided"
                 rows={4}
                 aria-label="Epic description"
-                className="w-full border border-surface-highest rounded-xl p-3 min-h-[150px] text-base leading-[26px] text-slate-900 placeholder:text-slate-muted focus:outline-none focus:border-primary transition resize-none disabled:opacity-60"
+                className="w-full border border-surface-highest rounded-xl p-3 min-h-37.5xt-base leading-6.5 text-slate-900 placeholder:text-slate-muted focus:outline-none focus:border-primary transition resize-none disabled:opacity-60"
             />
 
             {/* Meta grid */}
@@ -482,9 +466,7 @@ function EpicDetailsBody({
                     ) : (
                         <button
                             type="button"
-                            onClick={() =>
-                                setIsEditingAssignee(true)
-                            }
+                            onClick={() => setIsEditingAssignee(true)}
                             disabled={savingField === 'assignee_id'}
                             aria-label="Change assignee"
                             className={`${metaBox} w-full h-10 text-left hover:border-primary transition cursor-pointer disabled:opacity-60`}
@@ -550,6 +532,11 @@ function EpicDetailsBody({
                     </h3>
                     <button
                         type="button"
+                        onClick={() =>
+                            navigate(
+                                `/project/${projectId}/tasks/new`
+                            )
+                        }
                         className="flex items-center gap-1 px-3 py-1.5 rounded-sm text-sm font-semibold text-primary hover:bg-surface-low transition cursor-pointer"
                     >
                         <IconPlus className="size-2.5" />
@@ -557,15 +544,20 @@ function EpicDetailsBody({
                     </button>
                 </div>
 
-                <div className="bg-surface-low border-2 border-dashed border-slate-300/30 rounded-lg px-6 py-10 md:p-[50px] flex flex-col items-center">
+                <div className="bg-surface-low border-2 border-dashed border-slate-300/30 rounded-lg px-6 py-10 md:p-12.5 flex flex-col items-center">
                     <div className="bg-surface-highest rounded-xl size-12 flex items-center justify-center">
-                        <IconTasks className="size-[18px] text-primary" />
+                        <IconTasks className="size-4.5 text-primary" />
                     </div>
                     <p className="pt-4 text-base font-medium text-slate-900 text-center leading-6">
                         No tasks have been added to this epic yet
                     </p>
                     <button
                         type="button"
+                        onClick={() =>
+                            navigate(
+                                `/project/${projectId}/tasks/new`
+                            )
+                        }
                         className="mt-4 flex items-center gap-2 bg-linear-to-br from-primary to-primary-container text-white font-semibold text-base px-6 py-2.5 rounded-sm shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05)] hover:opacity-90 transition cursor-pointer"
                     >
                         <IconPlus className="size-3.5" />
@@ -582,7 +574,7 @@ function EpicDetailsSkeleton() {
 
     return (
         <div className="flex flex-col gap-8">
-            <div className={`h-[150px] w-full rounded-xl ${bar}`} />
+            <div className={`h-37.5 w-full rounded-xl ${bar}`} />
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 {Array.from({ length: 4 }).map((_, i) => (
                     <div key={i} className="flex flex-col gap-2">

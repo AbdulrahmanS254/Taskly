@@ -1,14 +1,25 @@
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useParams } from 'react-router';
+import { toast } from 'sonner';
+import type { z } from 'zod';
 
+import {
+    addTaskSchema,
+    type CreateTaskFormData,
+} from '../schemas/taskSchema';
+import { createTask } from '../services/taskService';
+import { getProjectEpics, type Epic } from '../services/epicService';
+import {
+    getProjectMembers,
+    type ProjectMember,
+} from '../services/membersService';
 import {
     IconCalendar,
     IconChevronRight,
 } from '../../../components/ui/icons';
 
-/**
- * Status values are a fixed enum (not API data), so they live here as markup.
- * Keep the `value`s in sync with STATUS_VALUES in schemas/taskSchema.ts.
- */
 const STATUS_OPTIONS = [
     { value: 'TO_DO', label: 'TO DO' },
     { value: 'IN_PROGRESS', label: 'IN PROGRESS' },
@@ -33,9 +44,67 @@ const selectChevron = {
         "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23041b3c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")",
 };
 
+// getProjectEpics is paginated; the dropdown wants them all in one call.
+const EPIC_OPTIONS_LIMIT = 100;
+
 export default function AddTaskPage() {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
+
+    const [epics, setEpics] = useState<Epic[]>([]);
+    const [members, setMembers] = useState<ProjectMember[]>([]);
+    const [isLoadingEpics, setIsLoadingEpics] = useState(true);
+    const [isLoadingMembers, setIsLoadingMembers] = useState(true);
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<
+        z.input<typeof addTaskSchema>,
+        unknown,
+        CreateTaskFormData
+    >({
+        resolver: zodResolver(addTaskSchema),
+        defaultValues: {
+            title: '',
+            description: '',
+            status: 'TO_DO',
+            assignee_id: '',
+            epic_id: '',
+            due_date: '',
+        },
+    });
+
+    useEffect(() => {
+        if (!projectId) return;
+
+        getProjectEpics(projectId, 1, EPIC_OPTIONS_LIMIT)
+            .then(({ epics: data }) => setEpics(data))
+            .catch(() => setEpics([]))
+            .finally(() => setIsLoadingEpics(false));
+
+        getProjectMembers(projectId)
+            .then((data) => setMembers(data))
+            .catch(() => setMembers([]))
+            .finally(() => setIsLoadingMembers(false));
+    }, [projectId]);
+
+    const onSubmit = async (data: CreateTaskFormData) => {
+        if (!projectId) return;
+
+        try {
+            await createTask(projectId, data);
+            toast.success('Task created');
+            navigate(`/project/${projectId}/tasks`);
+        } catch (error: unknown) {
+            toast.error(
+                error instanceof Error && error.message
+                    ? error.message
+                    : 'Failed to create task. Please try again.'
+            );
+        }
+    };
 
     return (
         <div className="flex flex-col gap-8">
@@ -69,10 +138,11 @@ export default function AddTaskPage() {
 
             {/* Form card */}
             <div className="rounded-lg bg-white p-4 shadow-[0px_24px_48px_-12px_rgba(4,27,60,0.06)] md:p-6">
-                {/* TODO: wire up onSubmit --> onSubmit={handleSubmit(yourSubmitHandler)} */}
-                <form noValidate className="flex flex-col gap-8">
-                    {/* TODO: render a server/submit error banner here if you need one */}
-
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    noValidate
+                    className="flex flex-col gap-8"
+                >
                     {/* Title */}
                     <div className="flex flex-col gap-2">
                         <label htmlFor="title" className={fieldLabel}>
@@ -81,13 +151,16 @@ export default function AddTaskPage() {
                         </label>
                         <input
                             id="title"
-                            name="title"
                             type="text"
                             placeholder="e.g., Finalize structural schematics"
-                            // TODO: wire up register('title')
+                            {...register('title')}
                             className={`${fieldBase} px-4 py-4 text-lg font-medium`}
                         />
-                        {/* TODO: render errors.title?.message here */}
+                        {errors.title && (
+                            <p className="text-xs font-medium text-error">
+                                {errors.title.message}
+                            </p>
+                        )}
                     </div>
 
                     {/* Status + Assignee */}
@@ -102,9 +175,7 @@ export default function AddTaskPage() {
                             </label>
                             <select
                                 id="status"
-                                name="status"
-                                defaultValue="TO_DO"
-                                // TODO: wire up register('status')
+                                {...register('status')}
                                 style={selectChevron}
                                 className={`${fieldBase} h-12 cursor-pointer appearance-none bg-size-[12px] bg-position-[right_1rem_center] bg-no-repeat px-4 pr-12 text-base`}
                             >
@@ -117,7 +188,11 @@ export default function AddTaskPage() {
                                     </option>
                                 ))}
                             </select>
-                            {/* TODO: render errors.status?.message here */}
+                            {errors.status && (
+                                <p className="text-xs font-medium text-error">
+                                    {errors.status.message}
+                                </p>
+                            )}
                         </div>
 
                         <div className="flex flex-col gap-2">
@@ -129,18 +204,31 @@ export default function AddTaskPage() {
                             </label>
                             <select
                                 id="assignee_id"
-                                name="assignee_id"
-                                defaultValue=""
-                                // TODO: wire up register('assignee_id')
+                                {...register('assignee_id')}
+                                disabled={isLoadingMembers}
                                 style={selectChevron}
                                 className={`${fieldBase} h-12 cursor-pointer appearance-none bg-size-[12px] bg-position-[right_1rem_center] bg-no-repeat px-4 pr-12 text-base`}
                             >
                                 <option value="">
-                                    Select Team Member
+                                    {isLoadingMembers
+                                        ? 'Loading members...'
+                                        : 'Select Team Member'}
                                 </option>
-                                {/* TODO: map project members from the API into <option> elements */}
+                                {members.map((member) => (
+                                    <option
+                                        key={member.member_id}
+                                        value={member.user_id}
+                                    >
+                                        {member.metadata?.name ||
+                                            member.email}
+                                    </option>
+                                ))}
                             </select>
-                            {/* TODO: render errors.assignee_id?.message here */}
+                            {errors.assignee_id && (
+                                <p className="text-xs font-medium text-error">
+                                    {errors.assignee_id.message}
+                                </p>
+                            )}
                         </div>
                     </div>
 
@@ -154,16 +242,27 @@ export default function AddTaskPage() {
                         </label>
                         <select
                             id="epic_id"
-                            name="epic_id"
-                            defaultValue=""
-                            // TODO: wire up register('epic_id')
+                            {...register('epic_id')}
+                            disabled={isLoadingEpics}
                             style={selectChevron}
                             className={`${fieldBase} h-12 cursor-pointer appearance-none bg-size-[12px] bg-position-[right_1rem_center] bg-no-repeat px-4 pr-12 text-base`}
                         >
-                            <option value="">Select Epic Link</option>
-                            {/* TODO: map project epics from the API into <option> elements */}
+                            <option value="">
+                                {isLoadingEpics
+                                    ? 'Loading epics...'
+                                    : 'Select Epic Link'}
+                            </option>
+                            {epics.map((epic) => (
+                                <option key={epic.id} value={epic.id}>
+                                    {epic.epic_id} — {epic.title}
+                                </option>
+                            ))}
                         </select>
-                        {/* TODO: render errors.epic_id?.message here */}
+                        {errors.epic_id && (
+                            <p className="text-xs font-medium text-error">
+                                {errors.epic_id.message}
+                            </p>
+                        )}
                     </div>
 
                     {/* Due date */}
@@ -177,9 +276,8 @@ export default function AddTaskPage() {
                         <div className="relative">
                             <input
                                 id="due_date"
-                                name="due_date"
                                 type="date"
-                                // TODO: wire up register('due_date')
+                                {...register('due_date')}
                                 className={`${fieldBase} h-12 cursor-pointer px-4 pr-12 text-base [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-12 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0`}
                             />
                             <IconCalendar
@@ -187,7 +285,11 @@ export default function AddTaskPage() {
                                 className="pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-slate-900"
                             />
                         </div>
-                        {/* TODO: render errors.due_date?.message here */}
+                        {errors.due_date && (
+                            <p className="text-xs font-medium text-error">
+                                {errors.due_date.message}
+                            </p>
+                        )}
                     </div>
 
                     {/* Description */}
@@ -200,13 +302,16 @@ export default function AddTaskPage() {
                         </label>
                         <textarea
                             id="description"
-                            name="description"
                             rows={5}
                             placeholder="Provide detailed context for this task..."
-                            // TODO: wire up register('description')
+                            {...register('description')}
                             className={`${fieldBase} h-36 resize-none px-4 py-3 text-base leading-6`}
                         />
-                        {/* TODO: render errors.description?.message here */}
+                        {errors.description && (
+                            <p className="text-xs font-medium text-error">
+                                {errors.description.message}
+                            </p>
+                        )}
                     </div>
 
                     {/* Actions */}
@@ -218,15 +323,19 @@ export default function AddTaskPage() {
                                     `/project/${projectId}/tasks`
                                 )
                             }
-                            className="rounded px-6 py-3 text-base font-medium text-slate-500 transition hover:bg-surface-low cursor-pointer"
+                            disabled={isSubmitting}
+                            className="rounded px-6 py-3 text-base font-medium text-slate-500 transition hover:bg-surface-low disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                         >
                             Back
                         </button>
                         <button
                             type="submit"
+                            disabled={isSubmitting}
                             className="rounded-xs bg-linear-to-br from-primary to-primary-container px-8 py-3 text-base font-semibold text-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                         >
-                            Create Task
+                            {isSubmitting
+                                ? 'Creating...'
+                                : 'Create Task'}
                         </button>
                     </div>
                 </form>
