@@ -6,7 +6,7 @@ import {
     dueDateSchema,
 } from '../../auth/schemas/commonSchemas';
 
-const STATUS_VALUES = [
+export const STATUS_VALUES = [
     'TO_DO',
     'IN_PROGRESS',
     'BLOCKED',

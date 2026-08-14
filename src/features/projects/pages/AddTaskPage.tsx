@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate, useParams } from 'react-router';
+import {
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from 'react-router';
 import { toast } from 'sonner';
 import type { z } from 'zod';
 
 import {
     addTaskSchema,
+    STATUS_VALUES,
     type CreateTaskFormData,
 } from '../schemas/taskSchema';
 import { createTask } from '../services/taskService';
@@ -47,9 +52,24 @@ const selectChevron = {
 // getProjectEpics is paginated; the dropdown wants them all in one call.
 const EPIC_OPTIONS_LIMIT = 100;
 
+function isValidStatus(
+    value: string | null
+): value is (typeof STATUS_VALUES)[number] {
+    return (
+        value !== null &&
+        (STATUS_VALUES as readonly string[]).includes(value)
+    );
+}
+
 export default function AddTaskPage() {
     const navigate = useNavigate();
     const { projectId } = useParams<{ projectId: string }>();
+    const [searchParams] = useSearchParams();
+
+    const statusParam = searchParams.get('status');
+    const initialStatus = isValidStatus(statusParam)
+        ? statusParam
+        : 'TO_DO';
 
     const [epics, setEpics] = useState<Epic[]>([]);
     const [members, setMembers] = useState<ProjectMember[]>([]);
@@ -69,7 +89,7 @@ export default function AddTaskPage() {
         defaultValues: {
             title: '',
             description: '',
-            status: 'TO_DO',
+            status: initialStatus,
             assignee_id: '',
             epic_id: '',
             due_date: '',
