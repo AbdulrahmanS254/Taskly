@@ -229,7 +229,7 @@ export default function ProjectTasksPage() {
                             backgroundPosition: 'left 14px center',
                             backgroundRepeat: 'no-repeat',
                         }}
-                        className="h-[42px] w-full rounded bg-surface-highest pl-10 pr-4 text-sm text-slate-900 placeholder:text-[#6b7280] focus:outline-none focus:ring-2 focus:ring-primary md:w-64"
+                        className="h-10.5-full rounded bg-surface-highest pl-10 pr-4 text-sm text-slate-900 placeholder:text-[#6b7280] focus:outline-none focus:ring-2 focus:ring-primary md:w-64"
                     />
 
                     <select
@@ -247,7 +247,7 @@ export default function ProjectTasksPage() {
                                 'left 17px center, right 17px center',
                             backgroundRepeat: 'no-repeat, no-repeat',
                         }}
-                        className="h-[42px] shrink-0 cursor-pointer appearance-none rounded border border-slate-300/20 bg-white pl-10 pr-11 text-sm font-medium text-slate-900 shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="h-10.5hrink-0 cursor-pointer appearance-none rounded border border-slate-300/20 bg-white pl-10 pr-11 text-sm font-medium text-slate-900 shadow-[0px_1px_1px_0px_rgba(0,0,0,0.05)] focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                         <option value="board">Board View</option>
                         <option value="list">List View</option>
@@ -337,7 +337,7 @@ function TaskColumn({
     const showCount = !loading && !error && tasks.length > 0;
 
     return (
-        <div className="flex min-h-[420px] w-72 shrink-0 flex-col gap-4">
+        <div className="flex min-h-105 w-72 shrink-0 flex-col gap-4">
             <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
                     <span
@@ -348,7 +348,7 @@ function TaskColumn({
                     </h3>
                     {showCount && (
                         <span
-                            className={`rounded-xs px-1.5 py-0.5 text-[10px] font-bold leading-[15px] ${meta.badgeBg} ${meta.badgeText}`}
+                            className={`rounded-xs px-1.5 py-0.5 text-[10px] font-bold leading-3.75 ${meta.badgeBg} ${meta.badgeText}`}
                         >
                             {tasks.length}
                         </span>
@@ -381,7 +381,7 @@ function TaskColumn({
                         <button
                             type="button"
                             onClick={() => onAddTask(status)}
-                            className="flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300/30 py-[18px] text-xs font-bold uppercase tracking-[1.2px] text-[#434654]/60 transition hover:border-primary/40 hover:text-primary"
+                            className="flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300/30 py-4.5 text-xs font-bold uppercase tracking-[1.2px] text-[#434654]/60 transition hover:border-primary/40 hover:text-primary"
                         >
                             <IconPlus className="size-3.5" />
                             Add New Task
@@ -445,7 +445,7 @@ function TaskCard({
             <div className="flex items-center justify-between gap-2">
                 {dueMeta ? (
                     <span
-                        className={`flex items-center gap-2 text-[10px] font-bold uppercase leading-[15px] ${dueMeta.className}`}
+                        className={`flex items-center gap-2 text-[10px] font-bold uppercase leading-3.75 ${dueMeta.className}`}
                     >
                         {dueMeta.tone === 'completed' ? (
                             <IconSuccess className="size-2.5 shrink-0" />
@@ -463,7 +463,7 @@ function TaskCard({
                 {task.assignee?.name && (
                     <div
                         title={task.assignee.name}
-                        className="flex size-6 shrink-0 items-center justify-center rounded-xl border border-white bg-[#e0e8ff] text-[10px] font-bold leading-[15px] text-slate-900"
+                        className="flex size-6 shrink-0 items-center justify-center rounded-xl border border-white bg-[#e0e8ff] text-[10px] font-bold leading-3.75 text-slate-900"
                     >
                         {getInitials(task.assignee.name)}
                     </div>
